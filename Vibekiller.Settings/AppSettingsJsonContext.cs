@@ -5,6 +5,7 @@ namespace Vibekiller.Settings;
 [JsonSourceGenerationOptions(WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.Never)]
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(InferenceSettings))]
+[JsonSerializable(typeof(GitSettings))]
 internal partial class AppSettingsJsonContext : JsonSerializerContext
 {
 }

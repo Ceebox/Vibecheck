@@ -17,5 +17,6 @@ public class InferenceSettings
             "ai_probability" is a lenient 0-1 float chance of the generated code being AI.
             "suggested_change" is ideally a code change, or architectural change.
             Remember, only return that JSON, not even "Assistant: or User:".
+            Only provide a comment if a change needs to be made (has_comment should mostly be false).
             """;
 }
