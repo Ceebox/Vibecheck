@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="./Vibekiller.Engine/Vibekiller.Engine.csproj" />
+  <Project Path="./Vibekiller.Git/Vibekiller.Git.csproj" />
+  <Project Path="./Vibekiller.Inference/Vibekiller.Inference.csproj" />
+  <Project Path="./Vibekiller.Settings/Vibekiller.Settings.csproj" />
+  <Project Path="./Vibekiller.Utility/Vibekiller.Utility.csproj" />
+  <Project Path="./Vibekiller/Vibekiller.csproj" />
+</Solution>
