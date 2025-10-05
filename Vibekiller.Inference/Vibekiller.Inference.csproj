@@ -21,4 +21,11 @@
     <ProjectReference Include="..\Vibekiller.Utility\Vibekiller.Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="**\ggml-base.dll" />
+    <None Remove="**\ggml-cpu.dll" />
+    <None Remove="**\llama.dll" />
+    <None Remove="**\llava_shared.dll" />
+  </ItemGroup>
+
 </Project>
