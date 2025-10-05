@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using Vibekiller.Utility;
 using Vibekiller.Engine;
+using Vibekiller.Settings;
 
 namespace Vibekiller
 {
@@ -20,8 +21,6 @@ namespace Vibekiller
                  ░░░     ░░░░░░░░░░░░   ░░░░░░ ░░░░ ░░░░░░░░░░░░░░░░░░░  ░░░░░░  ░░░░░                                                                       
             """;
 
-        private const string MODEL_URL = "https://huggingface.co/ibm-granite/granite-4.0-micro-GGUF/resolve/main/granite-4.0-micro-Q4_K_M.gguf";
-
         public static async Task<int> Main(string[] args)
         {
             Tracing.InitialiseTelemetry(new Uri("http://[::1]:4317/"));
@@ -32,7 +31,7 @@ namespace Vibekiller
             var debugCommand = new Command("debug", "Enter a debug mode.");
             debugCommand.SetAction(async _ =>
             {
-                var engine = new VibeEngine(MODEL_URL);
+                var engine = new ReviewEngine(Configuration.Current.InferenceSettings.ModelUrl);
                 await engine.Run();
             });
 
