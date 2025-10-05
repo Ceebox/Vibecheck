@@ -1,50 +1,36 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Vibekiller.Settings;
 
 public static class Configuration
 {
     private const string SETTINGS_FILE_NAME = "appsettings.json";
-    private static AppSettings sSettings = new();
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
-
-    static Configuration()
-    {
-        // Static constructor so we don't have to create it wherever we are
-        Load();
-    }
+    private static readonly AppSettings sSettings;
 
     public static AppSettings Current => sSettings;
 
-    private static void Load()
+    static Configuration()
     {
         var defaults = new AppSettings();
 
         if (!File.Exists(SETTINGS_FILE_NAME))
         {
-            // Create one from defaults
             sSettings = defaults;
             Save();
             return;
         }
 
         var json = File.ReadAllText(SETTINGS_FILE_NAME);
-        var existing = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? defaults;
+        var existing = JsonSerializer.Deserialize(json, typeof(AppSettings), AppSettingsJsonContext.Default) ?? defaults;
 
-        sSettings = Merge(defaults, existing);
+        sSettings = Merge(defaults, (AppSettings)existing);
 
-        // Save again to ensure new fields are written back
         Save();
     }
 
     private static void Save()
     {
-        var json = JsonSerializer.Serialize(sSettings, JsonOptions);
+        var json = JsonSerializer.Serialize(sSettings, AppSettingsJsonContext.Default.AppSettings);
         File.WriteAllText(SETTINGS_FILE_NAME, json);
     }
 

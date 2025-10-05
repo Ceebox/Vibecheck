@@ -24,7 +24,11 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
+
+    <!-- Allow reflection for System.Text.Json -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 
 </Project>
