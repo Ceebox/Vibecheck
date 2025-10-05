@@ -1,0 +1,52 @@
+name: Build + Test + Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: true
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
+      DOTNET_MULTILEVEL_LOOKUP: 0
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+    permissions: write-all
+    strategy:
+      matrix:
+        dotnet-version: ["9.0.x"]
+        dotnet-framework: ["net9.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+          
+      - name: Install dependencies
+        run: dotnet restore
+        
+      - name: Publish with dotnet
+        run: dotnet publish -c Release
+        
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ github.run_id }}
+          path: AlgolNet/bin/Release/${{ matrix.dotnet-framework }}
+          retention-days: 15
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Build-${{ github.run_id }}"
+          name: "Build-${{ github.run_id }}"
+          body: ""
+          draft: false
+          prerelease: false
+          files: release-files.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
