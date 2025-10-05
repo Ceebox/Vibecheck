@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ github.run_id }}
-          path: AlgolNet/bin/Release/${{ matrix.dotnet-framework }}
+          path: Vibekiller/bin/Release/${{ matrix.dotnet-framework }}
           retention-days: 15
           
       - name: Create Release
