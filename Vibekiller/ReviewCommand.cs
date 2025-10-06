@@ -1,12 +1,15 @@
 ﻿using System.CommandLine;
 using System.Text;
 using Vibekiller.Engine;
+using Vibekiller.Utility;
 
 namespace Vibekiller;
 internal sealed class ReviewCommand : CommandBase
 {
     public override Command ToCommand()
     {
+        using var activity = Tracing.Start();
+
         var pathOption = new Option<string>("--path")
         {
             Description = "The path of the target git repository.",
@@ -37,10 +40,17 @@ internal sealed class ReviewCommand : CommandBase
 
     private static async Task ExecuteAsync(string? repoPath, string? targetBranch)
     {
+        using var activity = Tracing.Start();
+
         var engine = new ReviewEngine(repoPath, targetBranch, null);
 
+        Console.WriteLine("Loading review comments...");
+
+        var hasResults = false;
         await foreach (var comment in engine.Review())
         {
+            hasResults = true;
+
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Path: {comment.Path}");
             Console.ResetColor();
@@ -61,10 +71,19 @@ internal sealed class ReviewCommand : CommandBase
 
             Console.WriteLine();
         }
+
+        if (!hasResults)
+        {
+            Console.WriteLine("No review comments found.");
+        }
+
+        activity.SetTag("review.hasResults", hasResults);
     }
 
     private static void PrintProbabilityBar(double probability)
     {
+        using var activity = Tracing.Start();
+
         probability = Math.Clamp(probability, 0, 1);
 
         var barWidth = 20;
@@ -79,6 +98,8 @@ internal sealed class ReviewCommand : CommandBase
 
     private static string GradientBar(int filled, int total, int r, int g)
     {
+        using var activity = Tracing.Start();
+
         var bar = new StringBuilder();
         bar.Append('|');
 
@@ -100,6 +121,9 @@ internal sealed class ReviewCommand : CommandBase
 
     private static (int r, int g) GetGradientColor(double p)
     {
+        using var activity = Tracing.Start();
+        activity.SetTag("gradient.progress", p);
+
         if (p < 0.5)
         {
             // Green -> Yellow

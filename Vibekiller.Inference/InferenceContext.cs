@@ -74,7 +74,8 @@ public sealed partial class InferenceContext
         var inferenceParams = new InferenceParams()
         {
             MaxTokens = Configuration.Current.InferenceSettings.MaxTokens,
-            AntiPrompts = Configuration.Current.InferenceSettings.AntiPrompts
+            AntiPrompts = Configuration.Current.InferenceSettings.AntiPrompts,
+            SamplingPipeline = new SettingBasedSamplingPipeline(Configuration.Current.InferenceSettings.SamplingSettings)
         };
 
         if (!mDiffs.Any())

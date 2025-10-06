@@ -62,7 +62,7 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         }
         else
         {
-            activity.Log("Model found in cache.");
+            activity.Log("Model found in cache.", LogLevel.INFO);
         }
 
         // Load model
