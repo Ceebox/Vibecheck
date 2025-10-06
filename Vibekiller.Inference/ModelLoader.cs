@@ -58,13 +58,11 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         // Download model if not cached
         if (!downloader.ModelDownloaded)
         {
-            Console.WriteLine("Downloading model...");
             await downloader.Load();
-            Console.WriteLine("Download complete.");
         }
         else
         {
-            Console.WriteLine("Model found in cache.");
+            activity.Log("Model found in cache.");
         }
 
         // Load model
