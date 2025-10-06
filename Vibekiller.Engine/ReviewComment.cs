@@ -1,4 +1,5 @@
 ﻿namespace Vibekiller.Engine;
+
 public sealed record ReviewComment
 {
     public string? Path { get; init; }

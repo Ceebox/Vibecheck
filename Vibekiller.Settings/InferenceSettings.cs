@@ -12,9 +12,9 @@ public class InferenceSettings
             [
               {
                 "HasChange": true,
-                "SuggestedChange": "A short, specific suggested change or improvement.",
+                "SuggestedChange": "Preferably a code suggestion, or a short, specific suggested change.",
                 "Comment": "Brief feedback about the issue or improvement.",
-                "AiProbability": 0.42
+                "AiProbability": float
               }
             ]
 

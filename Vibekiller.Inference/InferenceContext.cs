@@ -1,7 +1,6 @@
 ﻿using LLama;
 using LLama.Common;
 using LLama.Native;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using Vibekiller.Settings;
@@ -87,8 +86,8 @@ public sealed partial class InferenceContext
         {
             var sb = new StringBuilder();
 
-            // Give it the system prompt every time to keep it in the context window
-            var message = new ChatHistory.Message(AuthorRole.User, this.GeneratePrompt(diffText));
+            var prompt = this.GeneratePrompt(diffText);
+            var message = new ChatHistory.Message(AuthorRole.User, prompt);
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 sb.Append(chunk);
@@ -110,6 +109,8 @@ public sealed partial class InferenceContext
     {
         var codeStylePrompt = Configuration.Current.InferenceSettings.CodeStylePrompt;
         var completionPrompt = Configuration.Current.InferenceSettings.CompletionPrompt;
+
+        // Give it the system prompt every time to keep it in the context window
         return mSystemPrompt
             + '\n'
             + codeStylePrompt
