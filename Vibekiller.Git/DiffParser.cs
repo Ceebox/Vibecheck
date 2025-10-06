@@ -32,6 +32,7 @@ public sealed class DiffParser
         using var activity = Tracing.Start();
 
         var sb = new StringBuilder();
+        sb.AppendLine(hunk.Path);
         sb.AppendLine($"@@ -{hunk.OldStart},{hunk.OldCount} +{hunk.NewStart},{hunk.NewCount} @@");
         foreach (var line in hunk.Lines)
         {

@@ -38,12 +38,12 @@ namespace Vibekiller.Engine
                 inputCreator.FormatDiffs()
             );
             
-            await foreach (var response in context.Load())
+            await foreach (var response in context.Execute())
             {
-                foreach (var comment in inferenceResultParser.ParseResponse(response))
+                foreach (var comment in inferenceResultParser.ParseResponse(response.Contents))
                 {
-                    Console.WriteLine("Review Comment:");
-                    Console.WriteLine(comment.Comment);
+                    Console.WriteLine("Path: " + response.Path);
+                    Console.WriteLine($"- Review Comment: {comment.Comment}");
 
                     if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
                     {
