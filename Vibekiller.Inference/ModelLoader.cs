@@ -1,5 +1,6 @@
 ﻿using LLama;
 using LLama.Common;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;
@@ -19,9 +20,8 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         mModelPath = Path.Combine(CACHE_FOLDER, Path.GetFileName(mModelUrl));
         mModelParams = new ModelParams(mModelPath)
         {
-            // TODO: Make this adjustable
-            ContextSize = 8192,
-            GpuLayerCount = 32,
+            ContextSize = Convert.ToUInt32(Configuration.Current.InferenceSettings.ContextWindowSize),
+            GpuLayerCount = Configuration.Current.InferenceSettings.GpuLayerCount,
         };
     }
 
@@ -62,7 +62,7 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         }
         else
         {
-            activity.Log("Model found in cache.");
+            activity.Log("Model found in cache.", LogLevel.INFO);
         }
 
         // Load model

@@ -2,11 +2,13 @@
 using LLama.Common;
 using LLama.Native;
 using System.Text;
+using System.Text.RegularExpressions;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;
 
-public sealed class InferenceContext
+public sealed partial class InferenceContext
 {
     private readonly string mModelUrl;
     private readonly string mSystemPrompt;
@@ -43,11 +45,11 @@ public sealed class InferenceContext
     public InferenceContext(string modelUrl, string systemPrompt, IEnumerable<string> diffs)
     {
         mModelUrl = modelUrl;
-        mSystemPrompt = systemPrompt;
+        mSystemPrompt = CleanSystemPrompt(systemPrompt);
         mDiffs = diffs;
     }
 
-    public async IAsyncEnumerable<string> Load()
+    public async IAsyncEnumerable<InferenceResult> Execute()
     {
         var modelLoader = new ModelLoader(mModelUrl);
         var model = await modelLoader.Fetch();
@@ -63,7 +65,7 @@ public sealed class InferenceContext
         }
     }
 
-    private async IAsyncEnumerable<string> ProcessDiffs(InteractiveExecutor executor, ChatHistory chatHistory)
+    private async IAsyncEnumerable<InferenceResult> ProcessDiffs(InteractiveExecutor executor, ChatHistory chatHistory)
     {
         using var activity = Tracing.Start();
         activity.AddTag("diffs.count", mDiffs.Count());
@@ -71,8 +73,9 @@ public sealed class InferenceContext
         var session = new ChatSession(executor, chatHistory);
         var inferenceParams = new InferenceParams()
         {
-            MaxTokens = 512,
-            AntiPrompts = ["User:", "\nUser:", "</s>", "<|eot_id|>"]
+            MaxTokens = Configuration.Current.InferenceSettings.MaxTokens,
+            AntiPrompts = Configuration.Current.InferenceSettings.AntiPrompts,
+            SamplingPipeline = new SettingBasedSamplingPipeline(Configuration.Current.InferenceSettings.SamplingSettings)
         };
 
         if (!mDiffs.Any())
@@ -84,16 +87,83 @@ public sealed class InferenceContext
         {
             var sb = new StringBuilder();
 
-            // Give it the system prompt every time to keep it in the context window
-            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + diffText);
+            var prompt = this.GeneratePrompt(diffText);
+            var message = new ChatHistory.Message(AuthorRole.User, prompt);
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 sb.Append(chunk);
             }
 
-            yield return sb.ToString();
+            var parsedHeader = ParseHunkHeader(diffText);
+            var result = new InferenceResult()
+            {
+                Path = parsedHeader.Path,
+                CodeStartLine = parsedHeader.NewStart,
+                Contents = sb.ToString()
+            };
+
+            yield return result;
         }
     }
+
+    private string GeneratePrompt(string diff)
+    {
+        var codeStylePrompt = Configuration.Current.InferenceSettings.CodeStylePrompt;
+        var completionPrompt = Configuration.Current.InferenceSettings.CompletionPrompt;
+
+        // Give it the system prompt every time to keep it in the context window
+        return mSystemPrompt
+            + '\n'
+            + codeStylePrompt
+            + (string.IsNullOrEmpty(codeStylePrompt) ? string.Empty : "\n")
+            + diff
+            + (string.IsNullOrEmpty(completionPrompt) ? string.Empty : "\n")
+            + completionPrompt;
+    }
+
+    /// <summary>
+    /// Our prompt can have escape characters in that confuse the AI. Fix it up a little.
+    /// </summary>
+    /// <param name="initialPrompt">The prompt to clean.</param>
+    /// <returns></returns>
+    private static string CleanSystemPrompt(string initialPrompt)
+    {
+        var newPrompt = initialPrompt.Replace("\r\n", "");
+        newPrompt = newPrompt.Replace("\u2014", "");
+        newPrompt = newPrompt.Replace("\u0022", "");
+        newPrompt = newPrompt.Replace("\u201C", "");
+        newPrompt = newPrompt.Replace("\u201D", "");
+        newPrompt = newPrompt.Replace("\u0027", "");
+        newPrompt = newPrompt.Replace("\u0060", "");
+        return newPrompt;
+    }
+
+    #region Evil Git Header extraction
+
+    // Just pretend you didn't see this section
+    private static readonly Regex HunkHeaderExtractor = HunkHeaderRegex();
+
+    [GeneratedRegex(@"^(?<path>[^\r\n]+)\r?\n@@ -(?<oldStart>\d+),(?<oldCount>\d+) \+(?<newStart>\d+),(?<newCount>\d+) @@", RegexOptions.Multiline | RegexOptions.Compiled)]
+    private static partial Regex HunkHeaderRegex();
+
+    private static (string Path, int OldStart, int OldCount, int NewStart, int NewCount) ParseHunkHeader(string hunkText)
+    {
+        using var activity = Tracing.Start();
+
+        // If this fails, we're screwed
+        // But it shouldn't, hopefully
+        var match = HunkHeaderExtractor.Match(hunkText);
+
+        var path = match.Groups["path"].Value.Trim();
+        var oldStart = int.Parse(match.Groups["oldStart"].Value);
+        var oldCount = int.Parse(match.Groups["oldCount"].Value);
+        var newStart = int.Parse(match.Groups["newStart"].Value);
+        var newCount = int.Parse(match.Groups["newCount"].Value);
+
+        return (path, oldStart, oldCount, newStart, newCount);
+    }
+
+    #endregion
 
     private static async Task Chat(InteractiveExecutor executor, ChatHistory chatHistory)
     {

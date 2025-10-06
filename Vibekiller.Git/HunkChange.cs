@@ -2,7 +2,7 @@
 
 public sealed record HunkChange
 {
-    public string Path { get; init; } = string.Empty;
+    public required string Path { get; init; }
     public int OldStart { get; init; }
     public int OldCount { get; init; }
     public int NewStart { get; init; }

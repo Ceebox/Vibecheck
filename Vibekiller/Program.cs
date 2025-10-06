@@ -1,7 +1,5 @@
 ﻿using System.CommandLine;
 using Vibekiller.Utility;
-using Vibekiller.Engine;
-using Vibekiller.Settings;
 
 namespace Vibekiller
 {
@@ -23,7 +21,7 @@ namespace Vibekiller
         public static async Task<int> Main(string[] args)
         {
             Tracing.InitialiseTelemetry(new Uri("http://localhost:4317/"));
-            Console.WriteLine(LOGO);
+            Console.WriteLine(LOGO + '\n');
 
             return await Run(args);
         }
@@ -33,31 +31,7 @@ namespace Vibekiller
             var rootCommand = new RootCommand("Vibekiller CLI");
             var reviewCommand = new Command("review", "Review some code.");
 
-            var pathOption = new Option<string>("--path")
-            {
-                Description = "The path of the target git repository.",
-                DefaultValueFactory = _ => string.Empty
-            };
-
-            var targetOption = new Option<string>("--target")
-            {
-                Description = "The branch into which the reviewed changes are intented to be merged.",
-                DefaultValueFactory = _ => string.Empty
-            };
-
-            reviewCommand.Options.Add(pathOption);
-            reviewCommand.Options.Add(targetOption);
-
-            reviewCommand.SetAction(async parsedArgs =>
-            {
-                var repoPath = parsedArgs.GetValue(pathOption);
-                var targetBranch = parsedArgs.GetValue(targetOption);
-
-                var engine = new ReviewEngine(repoPath, targetBranch, null);
-                await engine.Run();
-            });
-
-            rootCommand.Add(reviewCommand);
+            rootCommand.Add(new ReviewCommand());
 
             var debugCommand = new Command("debug", "Enter development mode.");
             debugCommand.SetAction(async _ =>

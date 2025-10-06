@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Vibekiller.Settings\Vibekiller.Settings.csproj" />
     <ProjectReference Include="..\Vibekiller.Utility\Vibekiller.Utility.csproj" />
   </ItemGroup>
 

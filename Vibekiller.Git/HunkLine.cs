@@ -3,5 +3,5 @@
 public sealed record HunkLine
 {
     public ChangeType Type { get; init; }
-    public string Content { get; init; } = string.Empty;
+    public required string Content { get; init; }
 }

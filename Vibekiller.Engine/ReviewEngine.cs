@@ -24,7 +24,7 @@ namespace Vibekiller.Engine
                 : modelUrl;
         }
 
-        public async Task Run()
+        public async IAsyncEnumerable<ReviewComment> Review()
         {
             using var activity = Tracing.Start();
 
@@ -38,24 +38,11 @@ namespace Vibekiller.Engine
                 inputCreator.FormatDiffs()
             );
             
-            await foreach (var response in context.Load())
+            await foreach (var response in context.Execute())
             {
                 foreach (var comment in inferenceResultParser.ParseResponse(response))
                 {
-                    Console.WriteLine("Review Comment:");
-                    Console.WriteLine(comment.Comment);
-
-                    if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
-                    {
-                        Console.WriteLine($"- Suggested Change: {comment.SuggestedChange}");
-                    }
-
-                    if (comment.AiProbability.HasValue)
-                    {
-                        Console.WriteLine($"- AI Probability: {comment.AiProbability:F2}");
-                    }
-
-                    Console.WriteLine();
+                    yield return comment;
                 }
             }
         }
