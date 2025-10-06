@@ -8,7 +8,7 @@ namespace Vibekiller
     /// <summary>
     /// Entry point for the Vibekiller CLI interface.
     /// </summary>
-    internal sealed class  Program
+    internal sealed class Program
     {
         private const string LOGO = """
             ░█████  ░█████░███░████            ░█████     ░███ ░███ ░███                   
