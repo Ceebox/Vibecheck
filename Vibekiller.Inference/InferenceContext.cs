@@ -10,6 +10,7 @@ public sealed class InferenceContext
 {
     private readonly string mModelUrl;
     private readonly string mSystemPrompt;
+    private readonly IEnumerable<string> mDiffs;
 
     static InferenceContext()
     {
@@ -39,13 +40,14 @@ public sealed class InferenceContext
         });
     }
 
-    public InferenceContext(string modelUrl, string systemPrompt)
+    public InferenceContext(string modelUrl, string systemPrompt, IEnumerable<string> diffs)
     {
         mModelUrl = modelUrl;
         mSystemPrompt = systemPrompt;
+        mDiffs = diffs;
     }
 
-    public async Task Load()
+    public async IAsyncEnumerable<string> Load()
     {
         var modelLoader = new ModelLoader(mModelUrl);
         var model = await modelLoader.Fetch();
@@ -55,7 +57,42 @@ public sealed class InferenceContext
         var chatHistory = new ChatHistory();
         chatHistory.AddMessage(AuthorRole.System, mSystemPrompt);
 
-        await Chat(executor, chatHistory);
+        await foreach (var chunk in ProcessDiffs(executor, chatHistory))
+        {
+            yield return chunk;
+        }
+    }
+
+    private async IAsyncEnumerable<string> ProcessDiffs(InteractiveExecutor executor, ChatHistory chatHistory)
+    {
+        using var activity = Tracing.Start();
+        activity.AddTag("diffs.count", mDiffs.Count());
+
+        var session = new ChatSession(executor, chatHistory);
+        var inferenceParams = new InferenceParams()
+        {
+            MaxTokens = 512,
+            AntiPrompts = ["User:", "\nUser:", "</s>", "<|eot_id|>"]
+        };
+
+        if (!mDiffs.Any())
+        {
+            yield break;
+        }
+
+        foreach (var diffText in mDiffs)
+        {
+            var sb = new StringBuilder();
+
+            // Give it the system prompt every time to keep it in the context window
+            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + diffText);
+            await foreach (var chunk in session.ChatAsync(message, inferenceParams))
+            {
+                sb.Append(chunk);
+            }
+
+            yield return sb.ToString();
+        }
     }
 
     private static async Task Chat(InteractiveExecutor executor, ChatHistory chatHistory)

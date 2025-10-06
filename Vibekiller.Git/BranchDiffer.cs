@@ -35,6 +35,7 @@ public sealed partial class BranchDiffer
             yield break;
         }
 
+        // TODO: Probably allow configuring which branch is the merge base?
         // Find common ancestor (merge base) to diff from
         var mergeBase = repo.ObjectDatabase.FindMergeBase(current.Tip, target.Tip);
         var patch = repo.Diff.Compare<Patch>(mergeBase.Tree, current.Tip.Tree);

@@ -19,7 +19,8 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         mModelPath = Path.Combine(CACHE_FOLDER, Path.GetFileName(mModelUrl));
         mModelParams = new ModelParams(mModelPath)
         {
-            ContextSize = 2048,
+            // TODO: Make this adjustable
+            ContextSize = 8192,
             GpuLayerCount = 32,
         };
     }
@@ -57,13 +58,11 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         // Download model if not cached
         if (!downloader.ModelDownloaded)
         {
-            Console.WriteLine("Downloading model...");
             await downloader.Load();
-            Console.WriteLine("Download complete.");
         }
         else
         {
-            Console.WriteLine("Model found in cache.");
+            activity.Log("Model found in cache.");
         }
 
         // Load model

@@ -11,21 +11,25 @@ namespace Vibekiller
     internal sealed class Program
     {
         private const string LOGO = """
-             █████   █████ ████████             █████      ███████ ████                    
-            ░░███   ░░███ ░░░░░███             ░░███      ░░░░░███░░███                    
-             ░███    ░███ ████░███████   ██████ ░███ █████████░███ ░███   ██████  ████████ 
-             ░███    ░███░░███░███░░███ ███░░███░███░░███░░███░███ ░███  ███░░███░░███░░███
-             ░░███   ███  ░███░███ ░███░███████ ░██████░  ░███░███ ░███ ░███████  ░███ ░░░ 
-              ░░░█████░   ░███░███ ░███░███░░░  ░███░░███ ░███░███ ░███ ░███░░░   ░███     
-                ░░███     ████████████ ░░██████ ████ ███████████████████░░██████  █████    
-                 ░░░     ░░░░░░░░░░░░   ░░░░░░ ░░░░ ░░░░░░░░░░░░░░░░░░░  ░░░░░░  ░░░░░                                                                       
+            ░█████  ░█████░███░████            ░█████     ░███ ░███ ░███                   
+            ░░███   ░░███  ░░░░███              ░███       ░░░ ░███ ░███                   
+             ░███    ░███░████░███████  ░██████ ░███ █████████ ░███ ░███ ░██████ ░████████ 
+             ░███    ░███ ░███░███ ░███░███░░███░███░░███░░███ ░███ ░███░███░░███░░███░░███
+             ░░███   ███  ░███░███ ░███░███████ ░██████░  ░███ ░███ ░███░███████  ░███ ░░░ 
+              ░░░█████░   ░███░███ ░███░███░░░  ░███░░███ ░███ ░███ ░███░███░░░   ░███     
+                ░░███    ░████████████ ░░██████ ████ ███████████████████░░██████ ░█████    
             """;
 
         public static async Task<int> Main(string[] args)
         {
-            Tracing.InitialiseTelemetry(new Uri("http://[::1]:4317/"));
+            Tracing.InitialiseTelemetry(new Uri("http://localhost:4317/"));
             Console.WriteLine(LOGO);
 
+            return await Run(args);
+        }
+
+        private static async Task<int> Run(string[] args)
+        {
             var rootCommand = new RootCommand("Vibekiller CLI");
             var reviewCommand = new Command("review", "Review some code.");
 
@@ -46,20 +50,32 @@ namespace Vibekiller
 
             reviewCommand.SetAction(async parsedArgs =>
             {
-                // If the repo path is empty, we will use the working directory
                 var repoPath = parsedArgs.GetValue(pathOption);
+                var targetBranch = parsedArgs.GetValue(targetOption);
 
-                var target = parsedArgs.GetValue(targetOption);
-                if (string.IsNullOrEmpty(target))
-                {
-                    target = Configuration.Current.GitSettings.GitTargetBranch;
-                }
-
-                var engine = new ReviewEngine(Configuration.Current.InferenceSettings.ModelUrl);
+                var engine = new ReviewEngine(repoPath, targetBranch, null);
                 await engine.Run();
             });
 
             rootCommand.Add(reviewCommand);
+
+            var debugCommand = new Command("debug", "Enter development mode.");
+            debugCommand.SetAction(async _ =>
+            {
+                await rootCommand.Parse(["-h"]).InvokeAsync();
+
+                Console.Write("\nEnter command: ");
+                var newLine = Console.ReadLine();
+                if (string.IsNullOrEmpty(newLine))
+                {
+                    return;
+                }
+
+                var newArgs = newLine.Split(" ");
+                await Run(newArgs);
+            });
+
+            rootCommand.Add(debugCommand);
 
             if (args.Length == 0)
             {
