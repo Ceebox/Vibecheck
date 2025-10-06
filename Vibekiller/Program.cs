@@ -23,7 +23,7 @@ namespace Vibekiller
         public static async Task<int> Main(string[] args)
         {
             Tracing.InitialiseTelemetry(new Uri("http://localhost:4317/"));
-            Console.WriteLine(LOGO);
+            Console.WriteLine(LOGO + '\n');
 
             return await Run(args);
         }

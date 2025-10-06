@@ -43,7 +43,7 @@ public sealed class InferenceContext
     public InferenceContext(string modelUrl, string systemPrompt, IEnumerable<string> diffs)
     {
         mModelUrl = modelUrl;
-        mSystemPrompt = systemPrompt;
+        mSystemPrompt = this.CleanSystemPrompt(systemPrompt);
         mDiffs = diffs;
     }
 
@@ -72,7 +72,7 @@ public sealed class InferenceContext
         var inferenceParams = new InferenceParams()
         {
             MaxTokens = 512,
-            AntiPrompts = ["User:", "\nUser:", "</s>", "<|eot_id|>"]
+            AntiPrompts = ["User:", "(https://", "\nUser:", "</s>", "<|eot_id|>"]
         };
 
         if (!mDiffs.Any())
@@ -85,7 +85,7 @@ public sealed class InferenceContext
             var sb = new StringBuilder();
 
             // Give it the system prompt every time to keep it in the context window
-            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + diffText);
+            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + '\n' + diffText + "\n Complete the following JSON array describing code review comments, matching the schema.\r\n[");
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 sb.Append(chunk);
@@ -93,6 +93,23 @@ public sealed class InferenceContext
 
             yield return sb.ToString();
         }
+    }
+
+    /// <summary>
+    /// Our prompt can have escape characters in that confuse the AI. Fix it up a little.
+    /// </summary>
+    /// <param name="initialPrompt">The prompt to clean.</param>
+    /// <returns></returns>
+    private string CleanSystemPrompt(string initialPrompt)
+    {
+        var newPrompt = initialPrompt.Replace("\r\n", "");
+        newPrompt = newPrompt.Replace("\u2014", "");
+        newPrompt = newPrompt.Replace("\u0022", "");
+        newPrompt = newPrompt.Replace("\u201C", "");
+        newPrompt = newPrompt.Replace("\u201D", "");
+        newPrompt = newPrompt.Replace("\u0027", "");
+        newPrompt = newPrompt.Replace("\u0060", "");
+        return newPrompt;
     }
 
     private static async Task Chat(InteractiveExecutor executor, ChatHistory chatHistory)

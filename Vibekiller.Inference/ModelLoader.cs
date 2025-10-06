@@ -20,8 +20,8 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         mModelParams = new ModelParams(mModelPath)
         {
             // TODO: Make this adjustable
-            ContextSize = 8192,
-            GpuLayerCount = 32,
+            ContextSize = 2048,
+            GpuLayerCount = -1,
         };
     }
 

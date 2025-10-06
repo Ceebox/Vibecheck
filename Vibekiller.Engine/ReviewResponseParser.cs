@@ -1,9 +1,10 @@
 ﻿using System.Text.Json;
+using System.Text.RegularExpressions;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Engine;
 
-internal class ReviewResponseParser
+internal partial class ReviewResponseParser
 {
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -11,6 +12,8 @@ internal class ReviewResponseParser
         AllowTrailingCommas = true,
         ReadCommentHandling = JsonCommentHandling.Skip
     };
+
+    private static readonly Regex JsonExtractor = JsonExtractorRegex();
 
     public ReviewResponseParser()
     {
@@ -29,49 +32,73 @@ internal class ReviewResponseParser
             yield break;
         }
 
-        List<ReviewComment>? result;
-
-        try
+        // Ensure it starts with '[' to match the enforced array format
+        var json = response.Trim();
+        var user = "User:";
+        if (json.EndsWith(user))
         {
-            // Ensure it starts with '[' to match the enforced array format
-            var json = response.Trim();
-            var user = "User:";
-            if (json.EndsWith(user))
-            {
-                json = json[..^user.Length].TrimEnd();
-            }
-
-            if (string.IsNullOrEmpty(json))
-            {
-                yield break;
-            }    
-
-            if (!json.StartsWith('['))
-            {
-                // If the AI somehow returns a single object, wrap it to be valid JSON
-                json = $"[{json}]";
-            }
-
-            result = JsonSerializer.Deserialize<List<ReviewComment>>(json, Options);
-        }
-        catch (JsonException)
-        {
-            activity.AddError("Error parsing:\n" + response);
-            yield break;
+            json = json[..^user.Length].TrimEnd();
         }
 
-        if (result is null)
+        if (string.IsNullOrEmpty(json))
         {
             yield break;
         }
 
-        foreach (var comment in result)
+        var matches = JsonExtractor.Matches(json);
+        if (matches.Count == 0)
         {
-            if (comment is { HasComment: true } && !string.IsNullOrWhiteSpace(comment.Comment))
+            activity.AddError("No JSON found in response:\n" + response);
+            yield break;
+        }
+
+        foreach (var match in matches)
+        {
+            // If the AI somehow returns a single object, wrap it to be valid JSON
+            var candidate = ((Match)match).Value.Trim();
+            if (!candidate.StartsWith('['))
             {
-                yield return comment;
+                candidate = $"[{candidate}]";
+            }
+
+            candidate = ExtractJson(candidate);
+
+            List<ReviewComment>? result;
+            try
+            {
+                result = JsonSerializer.Deserialize<List<ReviewComment>>(candidate, Options);
+            }
+            catch (JsonException)
+            {
+                activity.AddError("Error parsing:\n" + response);
+                continue;
+            }
+
+            if (result is null)
+            {
+                continue;
+            }
+
+            foreach (var comment in result)
+            {
+                if (comment is { HasChange: true } && !string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                {
+                    yield return comment;
+                }
             }
         }
     }
+
+    private static string ExtractJson(string text)
+    {
+        var start = text.IndexOf('[');
+        var end = text.LastIndexOf(']');
+        if (start >= 0 && end > start)
+            return text[start..(end + 1)];
+        return "[]";
+    }
+
+    [GeneratedRegex(@"(\[[\s\S]*?\]|\{[\s\S]*?\})", RegexOptions.Multiline | RegexOptions.Compiled)]
+    private static partial Regex JsonExtractorRegex();
 }
 

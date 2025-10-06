@@ -11,10 +11,10 @@ public class InferenceSettings
 
             [
               {
-                "has_comment": true,
-                "comment": "Brief feedback about the issue or improvement.",
-                "suggested_change": "A short, specific suggested change or improvement.",
-                "ai_probability": 0.42
+                "HasChange": true,
+                "SuggestedChange": "A short, specific suggested change or improvement.",
+                "Comment": "Brief feedback about the issue or improvement.",
+                "AiProbability": 0.42
               }
             ]
 
@@ -22,9 +22,10 @@ public class InferenceSettings
             - Always output a **JSON array** (`[]`) — never an object or text.
             - If there are **no issues**, return an **empty array**: `[]`.
             - Each array element represents **one review comment** for the diff.
-            - `"has_comment"` is required in each object.
-            - `"ai_probability"` is a float between 0 and 1 estimating whether the code appears AI-generated.
+            - `"has_change"` is required in each object.
             - `"suggested_change"` can be omitted if not relevant.
+            - `"comment"` can also be omitted if not relevant or if the suggested change is trivial.
+            - `"ai_probability"` is a float between 0 and 1 estimating whether the code appears AI-generated.
             - Never include “Assistant:”, “User:”, or any text outside of JSON.
             - Be concise and only comment when necessary.
             """;
