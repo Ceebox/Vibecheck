@@ -1,7 +1,5 @@
 ﻿using LLama;
 using LLama.Common;
-using LLama.Native;
-using System.Diagnostics;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;

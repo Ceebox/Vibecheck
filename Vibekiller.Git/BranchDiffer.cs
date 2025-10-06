@@ -8,15 +8,32 @@ public sealed partial class BranchDiffer
 {
     private static readonly Regex HunkHeaderRegex = HunkRegex();
 
-    public static IEnumerable<LineChange> GetBranchDiffs(string repoPath, string targetBranch)
+    private readonly string mRepoPath;
+    private readonly string mTargetBranch;
+
+    public BranchDiffer(string repoPath, string targetBranch)
+    {
+        mRepoPath = repoPath;
+        mTargetBranch = targetBranch;
+    }
+
+    public IEnumerable<HunkChange> GetBranchDiffs()
     {
         using var activity = Tracing.Start();
 
-        repoPath = Repository.Discover(repoPath);
+        activity.AddTag("git.repo_path", mRepoPath);
+        activity.AddTag("git.target_branch", mTargetBranch);
+
+        var repoPath = Repository.Discover(mRepoPath);
         using var repo = new Repository(repoPath);
 
         var current = repo.Head;
-        var target = repo.Branches[targetBranch] ?? throw new ArgumentException($"Branch '{targetBranch}' not found.");
+        var target = repo.Branches[mTargetBranch];
+        if (target == null)
+        {
+            activity.Log($@"Branch '{mTargetBranch}' not found.", Utility.LogLevel.ERROR);
+            yield break;
+        }
 
         // Find common ancestor (merge base) to diff from
         var mergeBase = repo.ObjectDatabase.FindMergeBase(current.Tip, target.Tip);
@@ -29,39 +46,81 @@ public sealed partial class BranchDiffer
                 continue;
             }
 
-            int? oldLine = null;
-            int? newLine = null;
-
-            foreach (var line in file.Patch.Split('\n'))
+            foreach (var hunk in ParsePatchToHunks(file.Path, file.Patch))
             {
-                var hunkMatch = HunkHeaderRegex.Match(line);
-                if (hunkMatch.Success)
-                {
-                    oldLine = int.Parse(hunkMatch.Groups[1].Value) - 1;
-                    newLine = int.Parse(hunkMatch.Groups[2].Value) - 1;
-                    continue;
-                }
-
-                if (line.StartsWith('+') && !line.StartsWith("+++"))
-                {
-                    newLine++;
-                    yield return new LineChange(file.Path, null, newLine, "Added", line[1..]);
-                }
-                else if (line.StartsWith('-') && !line.StartsWith("---"))
-                {
-                    oldLine++;
-                    yield return new LineChange(file.Path, oldLine, null, "Deleted", line[1..]);
-                }
-                else
-                {
-                    oldLine++;
-                    newLine++;
-                    yield return new LineChange(file.Path, oldLine, newLine, "Unmodified", line[1..]);
-                }
+                yield return hunk;
             }
         }
     }
 
-    [GeneratedRegex(@"@@ -(\d+),\d+ \+(\d+),\d+ @@", RegexOptions.Compiled)]
+    internal static IEnumerable<HunkChange> ParsePatchToHunks(string filePath, string patchText)
+    {
+        if (string.IsNullOrWhiteSpace(patchText))
+        {
+            yield break;
+        }
+
+        var currentHunk = default(HunkChange);
+        foreach (var rawLine in patchText.Split('\n'))
+        {
+            var line = rawLine.Replace("\r", "").TrimStart();
+
+            var hunkMatch = HunkHeaderRegex.Match(line);
+            if (hunkMatch.Success)
+            {
+                // If there was a previous hunk, yield it now
+                if (currentHunk != null)
+                {
+                    yield return currentHunk;
+                }
+
+                currentHunk = new HunkChange
+                {
+                    Path = filePath,
+                    OldStart = int.Parse(hunkMatch.Groups[1].Value),
+                    OldCount = int.Parse(hunkMatch.Groups[2].Value),
+                    NewStart = int.Parse(hunkMatch.Groups[3].Value),
+                    NewCount = int.Parse(hunkMatch.Groups[4].Value)
+                };
+
+                continue;
+            }
+
+            // Skip file header lines (--- and +++)
+            if (line.StartsWith("---") || line.StartsWith("+++"))
+            {
+                continue;
+            }
+
+            // Ignore lines before the first hunk header
+            if (currentHunk == null)
+            {
+                continue;
+            }
+
+            if (line.StartsWith('+'))
+            {
+                currentHunk.Lines.Add(new HunkLine { Type = ChangeType.ADDED, Content = line[1..] });
+            }
+            else if (line.StartsWith('-'))
+            {
+                currentHunk.Lines.Add(new HunkLine { Type = ChangeType.DELETED, Content = line[1..] });
+            }
+            else
+            {
+                // Context or unmodified lines (strip leading space or backslash)
+                var content = line.Length > 0 && (line[0] == ' ' || line[0] == '\\') ? line[1..] : line;
+                currentHunk.Lines.Add(new HunkLine { Type = ChangeType.UNMODIFIED, Content = content });
+            }
+        }
+
+        // Yield the last hunk if present
+        if (currentHunk != null)
+        {
+            yield return currentHunk;
+        }
+    }
+
+    [GeneratedRegex(@"@@ -(\d+),(\d+) \+(\d+),(\d+) @@", RegexOptions.Compiled)]
     private static partial Regex HunkRegex();
 }

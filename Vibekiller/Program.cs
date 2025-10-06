@@ -28,15 +28,38 @@ namespace Vibekiller
 
             var rootCommand = new RootCommand("Vibekiller CLI");
             var reviewCommand = new Command("review", "Review some code.");
-            var debugCommand = new Command("debug", "Enter a debug mode.");
-            debugCommand.SetAction(async _ =>
+
+            var pathOption = new Option<string>("--path")
             {
+                Description = "The path of the target git repository.",
+                DefaultValueFactory = _ => string.Empty
+            };
+
+            var targetOption = new Option<string>("--target")
+            {
+                Description = "The branch into which the reviewed changes are intented to be merged.",
+                DefaultValueFactory = _ => string.Empty
+            };
+
+            reviewCommand.Options.Add(pathOption);
+            reviewCommand.Options.Add(targetOption);
+
+            reviewCommand.SetAction(async parsedArgs =>
+            {
+                // If the repo path is empty, we will use the working directory
+                var repoPath = parsedArgs.GetValue(pathOption);
+
+                var target = parsedArgs.GetValue(targetOption);
+                if (string.IsNullOrEmpty(target))
+                {
+                    target = Configuration.Current.GitSettings.GitTargetBranch;
+                }
+
                 var engine = new ReviewEngine(Configuration.Current.InferenceSettings.ModelUrl);
                 await engine.Run();
             });
 
             rootCommand.Add(reviewCommand);
-            rootCommand.Add(debugCommand);
 
             if (args.Length == 0)
             {
