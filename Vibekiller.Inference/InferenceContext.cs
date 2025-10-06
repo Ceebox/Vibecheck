@@ -82,10 +82,16 @@ public sealed class InferenceContext
 
         foreach (var diffText in mDiffs)
         {
-            await foreach (var chunk in session.ChatAsync(new ChatHistory.Message(AuthorRole.User, diffText), inferenceParams))
+            var sb = new StringBuilder();
+
+            // Give it the system prompt every time to keep it in the context window
+            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + diffText);
+            await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
-                yield return chunk;
+                sb.Append(chunk);
             }
+
+            yield return sb.ToString();
         }
     }
 

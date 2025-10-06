@@ -63,6 +63,9 @@ namespace Vibekiller
             var debugCommand = new Command("debug", "Enter development mode");
             debugCommand.SetAction(async _ =>
             {
+                await rootCommand.Parse(["-h"]).InvokeAsync();
+
+                Console.Write("\nEnter command: ");
                 var newLine = Console.ReadLine();
                 if (string.IsNullOrEmpty(newLine))
                 {

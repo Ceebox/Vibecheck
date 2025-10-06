@@ -35,6 +35,17 @@ internal class ReviewResponseParser
         {
             // Ensure it starts with '[' to match the enforced array format
             var json = response.Trim();
+            var user = "User:";
+            if (json.EndsWith(user))
+            {
+                json = json[..^user.Length].TrimEnd();
+            }
+
+            if (string.IsNullOrEmpty(json))
+            {
+                yield break;
+            }    
+
             if (!json.StartsWith('['))
             {
                 // If the AI somehow returns a single object, wrap it to be valid JSON

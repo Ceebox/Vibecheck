@@ -19,7 +19,8 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         mModelPath = Path.Combine(CACHE_FOLDER, Path.GetFileName(mModelUrl));
         mModelParams = new ModelParams(mModelPath)
         {
-            ContextSize = 2048,
+            // TODO: Make this adjustable
+            ContextSize = 8192,
             GpuLayerCount = 32,
         };
     }
