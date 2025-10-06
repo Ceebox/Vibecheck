@@ -1,4 +1,5 @@
-﻿using Vibekiller.Inference;
+﻿using Vibekiller.Git;
+using Vibekiller.Inference;
 using Vibekiller.Settings;
 using Vibekiller.Utility;
 
@@ -6,20 +7,57 @@ namespace Vibekiller.Engine
 {
     public sealed class ReviewEngine : IDisposable
     {
+        private readonly string mRepoPath;
+        private readonly string mTargetBranch;
         private readonly string mModelUrl;
 
-        public ReviewEngine(string modelUrl)
+        public ReviewEngine(string? repoPath, string? targetBranch, string? modelUrl)
         {
-            mModelUrl = modelUrl;
+            mRepoPath = string.IsNullOrEmpty(repoPath)
+                ? string.Empty
+                : repoPath;
+            mTargetBranch = string.IsNullOrEmpty(targetBranch)
+                ? Configuration.Current.GitSettings.GitTargetBranch
+                : targetBranch;
+            mModelUrl = string.IsNullOrEmpty(modelUrl)
+                ? Configuration.Current.InferenceSettings.ModelUrl
+                : modelUrl;
         }
 
         public async Task Run()
         {
             using var activity = Tracing.Start();
 
-            // Prepare system prompt
-            var context = new InferenceContext(mModelUrl, Configuration.Current.InferenceSettings.SystemPrompt);
-            await context.Load();
+            var diffEngine = new BranchDiffer(mRepoPath, mTargetBranch);
+            var diffs = diffEngine.GetBranchDiffs();
+            var inputCreator = new DiffParser(diffs);
+            var inferenceResultParser = new ReviewResponseParser();
+            var context = new InferenceContext(
+                mModelUrl,
+                Configuration.Current.InferenceSettings.SystemPrompt,
+                inputCreator.FormatDiffs()
+            );
+            
+            await foreach (var response in context.Load())
+            {
+                foreach (var comment in inferenceResultParser.ParseResponse(response))
+                {
+                    Console.WriteLine("Review Comment:");
+                    Console.WriteLine(comment.Comment);
+
+                    if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                    {
+                        Console.WriteLine($"- Suggested Change: {comment.SuggestedChange}");
+                    }
+
+                    if (comment.AiProbability.HasValue)
+                    {
+                        Console.WriteLine($"- AI Probability: {comment.AiProbability:F2}");
+                    }
+
+                    Console.WriteLine();
+                }
+            }
         }
 
         public void Dispose()
