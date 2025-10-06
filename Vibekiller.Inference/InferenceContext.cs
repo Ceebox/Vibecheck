@@ -4,6 +4,7 @@ using LLama.Native;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;
@@ -73,8 +74,8 @@ public sealed partial class InferenceContext
         var session = new ChatSession(executor, chatHistory);
         var inferenceParams = new InferenceParams()
         {
-            MaxTokens = 512,
-            AntiPrompts = ["User:", "(https://", "\nUser:", "</s>", "<|eot_id|>"]
+            MaxTokens = Configuration.Current.InferenceSettings.MaxTokens,
+            AntiPrompts = Configuration.Current.InferenceSettings.AntiPrompts
         };
 
         if (!mDiffs.Any())
@@ -87,7 +88,7 @@ public sealed partial class InferenceContext
             var sb = new StringBuilder();
 
             // Give it the system prompt every time to keep it in the context window
-            var message = new ChatHistory.Message(AuthorRole.User, mSystemPrompt + '\n' + diffText + "\n Complete the following JSON array describing code review comments, matching the schema.\r\n[");
+            var message = new ChatHistory.Message(AuthorRole.User, this.GeneratePrompt(diffText));
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 sb.Append(chunk);
@@ -103,6 +104,19 @@ public sealed partial class InferenceContext
 
             yield return result;
         }
+    }
+
+    private string GeneratePrompt(string diff)
+    {
+        var codeStylePrompt = Configuration.Current.InferenceSettings.CodeStylePrompt;
+        var completionPrompt = Configuration.Current.InferenceSettings.CompletionPrompt;
+        return mSystemPrompt
+            + '\n'
+            + codeStylePrompt
+            + (string.IsNullOrEmpty(codeStylePrompt) ? string.Empty : "\n")
+            + diff
+            + (string.IsNullOrEmpty(completionPrompt) ? string.Empty : "\n")
+            + completionPrompt;
     }
 
     /// <summary>

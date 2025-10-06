@@ -29,4 +29,10 @@ public class InferenceSettings
             - Never include “Assistant:”, “User:”, or any text outside of JSON.
             - Be concise and only comment when necessary.
             """;
+    public string CodeStylePrompt { get; set; } = string.Empty;
+    public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema.\r\n[";
+    public int ContextWindowSize { get; set; } = 2048;
+    public int GpuLayerCount { get; set; } = -1;
+    public int MaxTokens { get; set; } = 512;
+    public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>"];
 }

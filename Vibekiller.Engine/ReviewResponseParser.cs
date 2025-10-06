@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Options;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using Vibekiller.Inference;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Engine;
@@ -20,13 +22,14 @@ internal partial class ReviewResponseParser
 
     }
 
-    internal IEnumerable<ReviewComment> ParseResponse(string response)
+    internal IEnumerable<ReviewComment> ParseResponse(InferenceResult result)
     {
         using var activity = Tracing.Start();
 
         // I hate working with AI, we could literally have anything here
         // So, I guess I'll just try and predict the future
         // Decode by vibes, there are no rules!
+        var response = result.Contents;
         if (string.IsNullOrWhiteSpace(response))
         {
             yield break;
@@ -63,10 +66,10 @@ internal partial class ReviewResponseParser
 
             candidate = ExtractJson(candidate);
 
-            List<ReviewComment>? result;
+            List<ReviewComment>? parsedComment;
             try
             {
-                result = JsonSerializer.Deserialize<List<ReviewComment>>(candidate, Options);
+                parsedComment = JsonSerializer.Deserialize<List<ReviewComment>>(candidate, Options);
             }
             catch (JsonException)
             {
@@ -74,16 +77,16 @@ internal partial class ReviewResponseParser
                 continue;
             }
 
-            if (result is null)
+            if (parsedComment is null)
             {
                 continue;
             }
 
-            foreach (var comment in result)
+            foreach (var comment in parsedComment)
             {
                 if (comment is { HasChange: true } && !string.IsNullOrWhiteSpace(comment.SuggestedChange))
                 {
-                    yield return comment;
+                    yield return comment with { Path = result.Path };
                 }
             }
         }

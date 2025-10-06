@@ -1,5 +1,6 @@
 ﻿using LLama;
 using LLama.Common;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;
@@ -19,9 +20,8 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         mModelPath = Path.Combine(CACHE_FOLDER, Path.GetFileName(mModelUrl));
         mModelParams = new ModelParams(mModelPath)
         {
-            // TODO: Make this adjustable
-            ContextSize = 2048,
-            GpuLayerCount = -1,
+            ContextSize = Convert.ToUInt32(Configuration.Current.InferenceSettings.ContextWindowSize),
+            GpuLayerCount = Configuration.Current.InferenceSettings.GpuLayerCount,
         };
     }
 

@@ -54,7 +54,23 @@ namespace Vibekiller
                 var targetBranch = parsedArgs.GetValue(targetOption);
 
                 var engine = new ReviewEngine(repoPath, targetBranch, null);
-                await engine.Run();
+                await foreach (var comment in engine.Review())
+                {
+                    Console.WriteLine("Path: " + comment.Path);
+                    Console.WriteLine($"- Review Comment: {comment.Comment}");
+
+                    if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                    {
+                        Console.WriteLine($"- Suggested Change: {comment.SuggestedChange}");
+                    }
+
+                    if (comment.AiProbability.HasValue)
+                    {
+                        Console.WriteLine($"- AI Probability: {comment.AiProbability:F2}");
+                    }
+
+                    Console.WriteLine();
+                }
             });
 
             rootCommand.Add(reviewCommand);
