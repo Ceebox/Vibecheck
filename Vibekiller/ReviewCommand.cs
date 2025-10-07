@@ -16,33 +16,64 @@ internal sealed class ReviewCommand : CommandBase
             DefaultValueFactory = _ => string.Empty
         };
 
+        var sourceOption = new Option<string>("--source")
+        {
+            Description = "The source branch to compare (defaults to current branch).",
+            DefaultValueFactory = _ => string.Empty
+        };
+
         var targetOption = new Option<string>("--target")
         {
-            Description = "The branch into which the reviewed changes are intended to be merged.",
+            Description = "The branch or tag into which changes are intended to be merged.",
             DefaultValueFactory = _ => string.Empty
+        };
+
+        var sourceOffsetOption = new Option<int>("--source-offset")
+        {
+            Description = "Number of commits back from the source branch HEAD.",
+            DefaultValueFactory = _ => 0
+        };
+
+        var targetOffsetOption = new Option<int>("--target-offset")
+        {
+            Description = "Number of commits back from the target branch HEAD.",
+            DefaultValueFactory = _ => 0
         };
 
         var cmd = new Command("review", "Review code changes in a repository.")
         {
             pathOption,
-            targetOption
+            sourceOption,
+            targetOption,
+            sourceOffsetOption,
+            targetOffsetOption
         };
 
         cmd.SetAction(async parsedArgs =>
         {
             var repoPath = parsedArgs.GetValue(pathOption);
+            var sourceBranch = parsedArgs.GetValue(sourceOption);
             var targetBranch = parsedArgs.GetValue(targetOption);
-            await ExecuteAsync(repoPath, targetBranch);
+            var sourceOffset = parsedArgs.GetValue(sourceOffsetOption);
+            var targetOffset = parsedArgs.GetValue(targetOffsetOption);
+
+            await ExecuteAsync(repoPath, sourceBranch, targetBranch, sourceOffset, targetOffset);
         });
 
         return cmd;
     }
 
-    private static async Task ExecuteAsync(string? repoPath, string? targetBranch)
+    private static async Task ExecuteAsync(
+        string? repoPath,
+        string? sourceBranch,
+        string? targetBranch,
+        int? sourceOffset,
+        int? targetOffset
+    )
     {
         using var activity = Tracing.Start();
 
-        var engine = new ReviewEngine(repoPath, targetBranch, null);
+        var engine = new ReviewEngine(repoPath, null, sourceBranch, targetBranch, sourceOffset, targetOffset);
 
         var hasResults = false;
         await foreach (var comment in engine.Review())
