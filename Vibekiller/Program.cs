@@ -32,6 +32,7 @@ namespace Vibekiller
             var reviewCommand = new Command("review", "Review some code.");
 
             rootCommand.Add(new ReviewCommand());
+            rootCommand.Add(new ChatCommand());
 
             var debugCommand = new Command("debug", "Enter development mode.");
             debugCommand.SetAction(async _ =>

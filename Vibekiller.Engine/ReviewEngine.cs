@@ -32,7 +32,7 @@ namespace Vibekiller.Engine
             var diffs = diffEngine.GetBranchDiffs();
             var inputCreator = new DiffParser(diffs);
             var inferenceResultParser = new ReviewResponseParser();
-            var context = new InferenceContext(
+            var context = new DiffEngine(
                 mModelUrl,
                 Configuration.Current.InferenceSettings.SystemPrompt,
                 inputCreator.FormatDiffs()

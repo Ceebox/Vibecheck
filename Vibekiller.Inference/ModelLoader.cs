@@ -71,5 +71,5 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
     }
 
     private static string OutputDirectory
-        => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + CACHE_FOLDER;
+        => AppContext.BaseDirectory + "\\" + CACHE_FOLDER;
 }
