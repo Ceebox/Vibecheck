@@ -31,11 +31,16 @@ jobs:
       - name: List published files
         run: dir publish_output
 
+      - name: Zip published files
+        run: |
+          powershell Compress-Archive -Path publish_output\* -DestinationPath Vibekiller_Build_${{ github.run_id }}.zip
+        shell: pwsh
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VibekillerBuild
-          path: publish_output
+          path: Vibekiller_Build_${{ github.run_id }}.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -45,6 +50,6 @@ jobs:
           body: "Automated build"
           draft: false
           prerelease: false
-          files: ./publish_output/**
+          files: Vibekiller_Build_${{ github.run_id }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
