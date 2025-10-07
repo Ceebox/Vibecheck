@@ -43,6 +43,6 @@ jobs:
           body: "Automated build"
           draft: false
           prerelease: false
-          files: publish_output/**/*
+          files: ./publish_output/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
