@@ -26,7 +26,7 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish ./Vibekiller/Vibekiller.csproj -c Release -f ${{ matrix.framework }} -r win-x64 --self-contained true -o publish_output
+          dotnet publish ./Vibekiller/Vibekiller.csproj -c Release -f ${{ matrix.framework }} -r win-x64 --self-contained true -p:DebugType=None -p:DebugSymbols=false -o publish_output
 
       - name: List published files
         run: dir publish_output
