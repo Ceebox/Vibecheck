@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         dotnet-version: ["9.0.x"]
@@ -24,16 +26,21 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish -c Release -f ${{ matrix.framework }} -r win-x64 --self-contained true -o publish_output
+          dotnet publish ./Vibekiller/Vibekiller.csproj -c Release -f ${{ matrix.framework }} -r win-x64 --self-contained true -o publish_output
 
       - name: List published files
         run: dir publish_output
+
+      - name: Zip published files
+        run: |
+          powershell Compress-Archive -Path publish_output\* -DestinationPath Vibekiller_Build_${{ github.run_id }}.zip
+        shell: pwsh
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VibekillerBuild
-          path: publish_output
+          path: Vibekiller_Build_${{ github.run_id }}.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -43,6 +50,6 @@ jobs:
           body: "Automated build"
           draft: false
           prerelease: false
-          files: ./publish_output/**
+          files: Vibekiller_Build_${{ github.run_id }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
