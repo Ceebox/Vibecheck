@@ -49,14 +49,32 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
         foreach (var diffText in mDiffs)
         {
-            var sb = new StringBuilder();
+            var buffer = new StringBuilder();
 
             var prompt = this.GeneratePrompt(diffText);
             var message = new ChatHistory.Message(AuthorRole.User, prompt);
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
-                sb.Append(chunk);
-                Tracing.Write(chunk, LogLevel.INFO);
+                buffer.Append(chunk);
+
+                // Check for anti-prompts in the current buffer
+                var antiIndex = inferenceParams.AntiPrompts
+                    .Select(ap => buffer.ToString().IndexOf(ap, StringComparison.Ordinal))
+                    .Where(idx => idx >= 0)
+                    .DefaultIfEmpty(-1)
+                    .Min();
+
+                if (antiIndex >= 0)
+                {
+                    // Truncate at the first anti-prompt
+                    var safeOutput = buffer.ToString(0, antiIndex);
+                    Tracing.Write(safeOutput, LogLevel.INFO);
+                    break;
+                }
+                else
+                {
+                    Tracing.Write(chunk, LogLevel.INFO);
+                }
             }
 
             var parsedHeader = ParseHunkHeader(diffText);
@@ -64,7 +82,7 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
             {
                 Path = parsedHeader.Path,
                 CodeStartLine = parsedHeader.NewStart,
-                Contents = sb.ToString()
+                Contents = buffer.ToString()
             };
 
             yield return result;
