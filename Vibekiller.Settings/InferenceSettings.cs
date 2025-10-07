@@ -36,6 +36,6 @@ public class InferenceSettings
     public int GpuLayerCount { get; set; } = -1;
     public int MaxTokens { get; set; } = 512;
     public int MainGpu { get; set; } = 0;
-    public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>", "]"];
+    public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>"];
     public SamplingSettings SamplingSettings { get; set; } = new();
 }
