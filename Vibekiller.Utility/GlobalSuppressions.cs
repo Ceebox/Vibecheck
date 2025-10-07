@@ -5,4 +5,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "<Pending>", Scope = "member", Target = "~M:Vibekiller.Inference.ModelDownloader.#ctor(System.String,System.String)")]
+[assembly: SuppressMessage(
+    "Style",
+    "IDE0290:Use primary constructor",
+    Justification = "They kinda suck, don't they?",
+    Scope = "namespaceanddescendants",
+    Target = "~N:Vibekiller"
+)]
