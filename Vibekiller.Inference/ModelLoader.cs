@@ -17,11 +17,12 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
     public ModelLoader(string modelUrl)
     {
         mModelUrl = modelUrl;
-        mModelPath = Path.Combine(CACHE_FOLDER, Path.GetFileName(mModelUrl));
+        mModelPath = Path.Combine(OutputDirectory, Path.GetFileName(mModelUrl));
         mModelParams = new ModelParams(mModelPath)
         {
             ContextSize = Convert.ToUInt32(Configuration.Current.InferenceSettings.ContextWindowSize),
             GpuLayerCount = Configuration.Current.InferenceSettings.GpuLayerCount,
+            MainGpu = Configuration.Current.InferenceSettings.MainGpu,
         };
     }
 
@@ -52,7 +53,7 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         }
 
         // Ensure cache directory exists
-        Directory.CreateDirectory(CACHE_FOLDER);
+        Directory.CreateDirectory(OutputDirectory);
         var downloader = new ModelDownloader(mModelUrl, mModelPath);
 
         // Download model if not cached
@@ -68,4 +69,7 @@ public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
         // Load model
         mWeights = LLamaWeights.LoadFromFile(mModelParams);
     }
+
+    private static string OutputDirectory
+        => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\" + CACHE_FOLDER;
 }
