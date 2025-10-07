@@ -2,6 +2,7 @@
 public class InferenceSettings
 {
     public string ModelUrl { get; set; } = "https://huggingface.co/ibm-granite/granite-4.0-micro-GGUF/resolve/main/granite-4.0-micro-Q4_K_M.gguf";
+    public string ModelApiToken { get; set; } = string.Empty;
     public string SystemPrompt { get; set; } = """
             You are an advanced senior software engineer performing automated code reviews.
             You must only output valid, compact JSON — nothing else. Do not include explanations, markdown, or additional text.

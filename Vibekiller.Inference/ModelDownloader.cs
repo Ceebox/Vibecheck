@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller.Inference;
@@ -43,6 +44,7 @@ internal sealed class ModelDownloader
                 var configurationBuilder = new ConfigurationBuilder();
                 var configuration = configurationBuilder.AddUserSecrets<ModelDownloader>().Build();
                 token ??= configuration.GetValue<string>("huggingface_api_key");
+                token ??= Configuration.Current.InferenceSettings.ModelApiToken;
                 if (token == null)
                 {
                     activity.Log("No API key found in user secrets.", LogLevel.WARNING);
