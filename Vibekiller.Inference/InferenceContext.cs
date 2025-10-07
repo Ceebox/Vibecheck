@@ -20,20 +20,21 @@ public sealed partial class InferenceContext : IDisposable
 
         NativeLibraryConfig.All.WithLogCallback((level, message) =>
         {
-            using var activity = Tracing.Start("Llama Log");
             if (level == LLamaLogLevel.Warning)
             {
-                activity.AddWarning(message);
+                // Write because these end with a newline
+                Tracing.Write(message, LogLevel.WARNING);
             }
             else if (level == LLamaLogLevel.Error)
             {
-                activity.AddError(message);
+                // Write because these end with a newline
+                Tracing.Write(message, LogLevel.ERROR);
             }
 
             // This is important, it means we are on the CPU instead
             if (level == LLamaLogLevel.Warning && message.Contains("cannot be used with preferred buffer type Vulkan_Host"))
             {
-                activity.Log("Unable to run this model on the GPU - using CPU instead.", LogLevel.ERROR);
+                Tracing.WriteLine("Unable to run this model on the GPU - using CPU instead.", LogLevel.ERROR);
             }
         });
     }

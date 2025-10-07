@@ -43,6 +43,7 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
         if (!mDiffs.Any())
         {
+            Tracing.WriteLine("No diffs found.", LogLevel.INFO);
             yield break;
         }
 
@@ -55,6 +56,7 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 sb.Append(chunk);
+                Tracing.Write(chunk, LogLevel.INFO);
             }
 
             var parsedHeader = ParseHunkHeader(diffText);

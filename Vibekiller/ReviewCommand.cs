@@ -44,8 +44,6 @@ internal sealed class ReviewCommand : CommandBase
 
         var engine = new ReviewEngine(repoPath, targetBranch, null);
 
-        Console.WriteLine("Loading review comments...");
-
         var hasResults = false;
         await foreach (var comment in engine.Review())
         {

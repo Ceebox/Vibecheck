@@ -5,7 +5,7 @@ namespace Vibekiller.Utility
     public static class ActivityExtensions
     {
         public static void Log(this Activity activity, object message)
-            => activity.Log(message, LogLevel.NONE);
+            => activity.Log(message, LogLevel.INFO);
 
         public static void Log(this Activity activity, Exception message)
             => activity.Log(message, LogLevel.ERROR);
@@ -37,7 +37,7 @@ namespace Vibekiller.Utility
                     break;
             }
 
-            PrettyPrint(output, logLevel);
+            ConsoleHelpers.PrettyPrintLine(output, logLevel);
         }
 
         public static void AddWarning(this Activity activity, object message)
@@ -60,25 +60,6 @@ namespace Vibekiller.Utility
                 activity.SetTag("error", true);
                 activity.AddEvent(new ActivityEvent("Error: " + output));
             }
-        }
-
-        private static void PrettyPrint(object message, LogLevel logLevel)
-        {
-            var originalColor = Console.ForegroundColor;
-
-            Console.ForegroundColor = logLevel switch
-            {
-                LogLevel.DEBUG => ConsoleColor.Gray,
-                LogLevel.NONE => ConsoleColor.White,
-                LogLevel.INFO => ConsoleColor.Blue,
-                LogLevel.SUCCESS => ConsoleColor.Green,
-                LogLevel.WARNING => ConsoleColor.Yellow,
-                LogLevel.ERROR => ConsoleColor.Red,
-                _ => ConsoleColor.White,
-            };
-
-            Console.WriteLine(message);
-            Console.ForegroundColor = originalColor;
         }
     }
 }

@@ -47,7 +47,7 @@ internal sealed class ModelDownloader
                 token ??= Configuration.Current.InferenceSettings.ModelApiToken;
                 if (token == null)
                 {
-                    activity.Log("No API key found in user secrets.", LogLevel.WARNING);
+                    activity.AddWarning("No API key found in user secrets.");
                 }
 #endif
 
@@ -56,7 +56,7 @@ internal sealed class ModelDownloader
 
             if (!success)
             {
-                activity.Log("Download failed due to authentication issues and no valid token.", LogLevel.ERROR);
+                activity.AddError("Download failed due to authentication issues and no valid token.");
             }
         }
         catch (Exception ex)
@@ -80,6 +80,7 @@ internal sealed class ModelDownloader
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
 
+        Tracing.WriteLine($"Trying to download model from {mDownloadUrl}...", LogLevel.INFO);
         using var response = await httpClient.GetAsync(mDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
 
         // We need a (correct) token!
