@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
 using System.Text;
 using Vibekiller.Engine;
+using Vibekiller.Git;
+using Vibekiller.Settings;
 using Vibekiller.Utility;
 
 namespace Vibekiller;
@@ -72,7 +74,25 @@ internal sealed class ReviewCommand : CommandBase
     )
     {
         using var activity = Tracing.Start();
-        using var engine = new ReviewEngine(repoPath, null, sourceBranch, targetBranch, sourceOffset, targetOffset);
+
+        repoPath = string.IsNullOrEmpty(repoPath)
+            ? string.Empty
+            : repoPath;
+        sourceBranch = string.IsNullOrEmpty(sourceBranch)
+            ? Configuration.Current.GitSettings.GitSourceBranch
+            : sourceBranch;
+        targetBranch = string.IsNullOrEmpty(targetBranch)
+            ? Configuration.Current.GitSettings.GitTargetBranch
+            : targetBranch;
+        sourceOffset = sourceOffset.HasValue
+            ? sourceOffset!.Value
+            : Configuration.Current.GitSettings.GitSourceCommitOffset;
+        targetOffset = targetOffset.HasValue
+            ? targetOffset!.Value
+            : Configuration.Current.GitSettings.GitTargetCommitOffset;
+
+        var patchGenerator = new BranchPatchSource(repoPath, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value);
+        using var engine = new ReviewEngine(null, patchGenerator);
 
         var hasResults = false;
         await foreach (var comment in engine.Review())

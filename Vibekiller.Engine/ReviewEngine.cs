@@ -7,55 +7,26 @@ namespace Vibekiller.Engine
 {
     public sealed class ReviewEngine : IDisposable
     {
-        private readonly string mRepoPath;
-        private readonly string mSourceBranch;
-        private readonly string mTargetBranch;
-        private readonly int mSourceOffset;
-        private readonly int mTargetOffset;
         private readonly string mModelUrl;
+        private readonly IPatchSource mPatchSource;
 
         public ReviewEngine(
-            string? repoPath,
             string? modelUrl,
-            string? sourceBranch,
-            string? targetBranch,
-            int? sourceOffset,
-            int? targetOffset
+            IPatchSource patchSource
         )
         {
-            mRepoPath = string.IsNullOrEmpty(repoPath)
-                ? string.Empty
-                : repoPath;
             mModelUrl = string.IsNullOrEmpty(modelUrl)
                 ? Configuration.Current.InferenceSettings.ModelUrl
                 : modelUrl;
-            mSourceBranch = string.IsNullOrEmpty(sourceBranch)
-                ? Configuration.Current.GitSettings.GitSourceBranch
-                : sourceBranch;
-            mTargetBranch = string.IsNullOrEmpty(targetBranch)
-                ? Configuration.Current.GitSettings.GitTargetBranch
-                : targetBranch;
-            mSourceOffset = sourceOffset.HasValue
-                ? sourceOffset!.Value
-                : Configuration.Current.GitSettings.GitSourceCommitOffset;
-            mTargetOffset = targetOffset.HasValue
-                ? targetOffset!.Value
-                : Configuration.Current.GitSettings.GitTargetCommitOffset;
+
+            mPatchSource = patchSource;
         }
 
         public async IAsyncEnumerable<ReviewComment> Review()
         {
             using var activity = Tracing.Start();
 
-            var patchGenerator = new BranchPatchSource(
-                mRepoPath,
-                mSourceBranch,
-                mTargetBranch,
-                mSourceOffset,
-                mTargetOffset
-            );
-
-            var diffEngine = new PatchDiffer(patchGenerator);
+            var diffEngine = new PatchDiffer(mPatchSource);
             var diffs = diffEngine.GetDiffs().ToList();
             var inputCreator = new DiffParser(diffs);
             using var context = await InferenceEngineFactory.CreateDiffEngine(
