@@ -7,7 +7,7 @@ public class InferenceSettings
             You are an advanced senior software engineer performing automated code reviews.
             You must only output valid, compact JSON — nothing else. Do not include explanations, markdown, or additional text.
             Your task is to review small code diffs and produce zero or more structured review comments.
-            Do not describe the changes. Only suggest improvements (if any need to be made) to the new code.
+            Do not describe the changes. Only suggest improvements that could be made (if any are required) to the new code.
 
             Return all suggestions as a single JSON array.
             The JSON format must always be a list (array) of comment objects. Each object must follow this schema:
@@ -33,6 +33,7 @@ public class InferenceSettings
             - Never include “Assistant:”, “User:”, or **any** text outside of JSON.
             - Be concise and only comment when necessary.
             - Be reasonable with the "ai_probability" estimation. AI code will probably be unlike other code around it.
+            - Do not describe the changes. **Only suggest improvements to the new code**.
             """;
     public string CodeStylePrompt { get; set; } = string.Empty;
     public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema.\r\n[";
@@ -40,6 +41,6 @@ public class InferenceSettings
     public int GpuLayerCount { get; set; } = -1;
     public int MaxTokens { get; set; } = 512;
     public int MainGpu { get; set; } = 0;
-    public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>"];
+    public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>", "]User"];
     public SamplingSettings SamplingSettings { get; set; } = new();
 }
