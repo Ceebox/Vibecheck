@@ -21,18 +21,9 @@
     <ProjectReference Include="..\Vibekiller.Engine\Vibekiller.Engine.csproj" />
   </ItemGroup>
 
-  <!-- Try to stop build conflicts -->
-  <ItemGroup>
-    <None Remove="**\ggml-base.dll" />
-    <None Remove="**\ggml-cpu.dll" />
-    <None Remove="**\llama.dll" />
-    <None Remove="**\llava_shared.dll" />
-  </ItemGroup>
-
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
 
     <!-- Allow reflection for System.Text.Json -->
     <InvariantGlobalization>true</InvariantGlobalization>
