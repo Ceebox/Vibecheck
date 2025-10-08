@@ -51,41 +51,45 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
         {
             var buffer = new StringBuilder();
 
+            var parsedHeader = ParseHunkHeader(diffText);
             var prompt = this.GeneratePrompt(diffText);
             var message = new ChatHistory.Message(AuthorRole.User, prompt);
             await foreach (var chunk in session.ChatAsync(message, inferenceParams))
             {
                 buffer.Append(chunk);
+                Tracing.Write(chunk, LogLevel.INFO);
 
-                // Check for anti-prompts in the current buffer
-                var antiIndex = inferenceParams.AntiPrompts
-                    .Select(ap => buffer.ToString().IndexOf(ap, StringComparison.Ordinal))
-                    .Where(idx => idx >= 0)
-                    .DefaultIfEmpty(-1)
-                    .Min();
+                while (true)
+                {
+                    // Check if we have a complete array and stop before the AI runs away from us!
+                    var jsonCandidate = JsonArrayExtractor.ExtractFirstCompleteArray(buffer.ToString());
+                    if (jsonCandidate == null)
+                    {
+                        break;
+                    }
 
-                if (antiIndex >= 0)
-                {
-                    // Truncate at the first anti-prompt
-                    var safeOutput = buffer.ToString(0, antiIndex);
-                    Tracing.Write(safeOutput, LogLevel.INFO);
-                    break;
-                }
-                else
-                {
-                    Tracing.Write(chunk, LogLevel.INFO);
+                    yield return new InferenceResult
+                    {
+                        Path = parsedHeader.Path + $" @ {parsedHeader.NewStart}",
+                        CodeStartLine = parsedHeader.NewStart,
+                        Contents = jsonCandidate
+                    };
+
+                    // Remove the portion we just processed from the buffer
+                    var idx = buffer.ToString().IndexOf(jsonCandidate, StringComparison.Ordinal);
+                    if (idx >= 0)
+                    {
+                        buffer.Remove(0, idx + jsonCandidate.Length);
+                    }
+                    else
+                    {
+                        buffer.Clear();
+                    }
                 }
             }
 
-            var parsedHeader = ParseHunkHeader(diffText);
-            var result = new InferenceResult()
-            {
-                Path = parsedHeader.Path,
-                CodeStartLine = parsedHeader.NewStart,
-                Contents = buffer.ToString()
-            };
-
-            yield return result;
+            // New line, otherwise everything is smushed
+            Tracing.Write("\n", LogLevel.INFO);
         }
     }
 

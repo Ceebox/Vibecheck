@@ -29,7 +29,6 @@ internal partial class ReviewResponseParser
             yield break;
         }
 
-        // Ensure it starts with '[' to match the enforced array format
         var json = response.Trim();
         var user = "User:";
         if (json.EndsWith(user))
