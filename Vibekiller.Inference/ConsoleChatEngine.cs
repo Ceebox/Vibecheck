@@ -6,7 +6,7 @@ namespace Vibekiller.Inference;
 
 public sealed class ConsoleChatEngine : InferenceEngineBase<Task>
 {
-    public ConsoleChatEngine(string modelUrl, string systemPrompt)
+    internal ConsoleChatEngine(string modelUrl, string systemPrompt)
     : base(modelUrl, systemPrompt)
     {
     }

@@ -58,8 +58,7 @@ namespace Vibekiller.Engine
             var diffEngine = new PatchDiffer(patchGenerator);
             var diffs = diffEngine.GetDiffs().ToList();
             var inputCreator = new DiffParser(diffs);
-            var inferenceResultParser = new ReviewResponseParser();
-            var context = new DiffEngine(
+            using var context = await InferenceEngineFactory.CreateDiffEngine(
                 mModelUrl,
                 Configuration.Current.InferenceSettings.SystemPrompt,
                 [.. inputCreator.FormatDiffs()]
@@ -67,7 +66,7 @@ namespace Vibekiller.Engine
             
             await foreach (var response in context.Execute())
             {
-                foreach (var comment in inferenceResultParser.ParseResponse(response))
+                foreach (var comment in ReviewResponseParser.ParseResponse(response))
                 {
                     yield return comment;
                 }

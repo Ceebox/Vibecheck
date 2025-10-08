@@ -2,7 +2,18 @@
 
 namespace Vibekiller.Inference;
 
-public abstract class InferenceEngineBase<T> : IDisposable
+public abstract class InferenceEngineBase : IDisposable
+{
+    public event EventHandler? Disposed;
+
+    public virtual void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        this.Disposed?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+public abstract class InferenceEngineBase<T> : InferenceEngineBase
 {
     private protected readonly InferenceContext mContext;
     private readonly string mSystemPrompt;
@@ -15,10 +26,11 @@ public abstract class InferenceEngineBase<T> : IDisposable
 
     public abstract T Execute();
 
-    public void Dispose()
+    public override void Dispose()
     {
         GC.SuppressFinalize(this);
         mContext.Dispose();
+        base.Dispose();
     }
 
     internal async Task<LLamaContext> GetContext()

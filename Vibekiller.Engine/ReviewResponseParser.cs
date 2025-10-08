@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using Vibekiller.Inference;
 using Vibekiller.Utility;
@@ -15,14 +14,9 @@ internal partial class ReviewResponseParser
         ReadCommentHandling = JsonCommentHandling.Skip
     };
 
-    private static readonly Regex JsonExtractor = JsonExtractorRegex();
+    public ReviewResponseParser() { }
 
-    public ReviewResponseParser()
-    {
-
-    }
-
-    internal IEnumerable<ReviewComment> ParseResponse(InferenceResult result)
+    internal static IEnumerable<ReviewComment> ParseResponse(InferenceResult result)
     {
         using var activity = Tracing.Start();
 
@@ -48,7 +42,7 @@ internal partial class ReviewResponseParser
             yield break;
         }
 
-        var matches = JsonExtractor.Matches(json);
+        var matches = JsonExtractorRegex().Matches(json);
         if (matches.Count == 0)
         {
             activity.AddError("No JSON found in response:\n" + response);

@@ -20,7 +20,6 @@ public class InferenceSettings
                 "AiProbability": float
               }
             ]
-            <|eot_id|>
 
             Rules:
             - Always output a **JSON array** (`[]`) — never an object or text.
@@ -34,13 +33,23 @@ public class InferenceSettings
             - Be concise and only comment when necessary.
             - Be reasonable with the "ai_probability" estimation. AI code will probably be unlike other code around it.
             - Do not describe the changes. **Only suggest improvements to the new code**.
+            - Stop (<|eot_id|>) at the end of the JSON "]".
             """;
     public string CodeStylePrompt { get; set; } = string.Empty;
     public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema.\r\n[";
     public int ContextWindowSize { get; set; } = 2048;
     public int GpuLayerCount { get; set; } = -1;
     public int MaxTokens { get; set; } = 512;
+
+    /// <summary>
+    /// The GPU to perform inference on.
+    /// </summary>
     public int MainGpu { get; set; } = 0;
+
+    /// <summary>
+    /// The maximum amount of inference contexts permitted to exist at once.
+    /// </summary>
+    public int ContextLimit { get; set; } = 1;
     public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "</s>", "<|eot_id|>", "]User"];
     public SamplingSettings SamplingSettings { get; set; } = new();
 }

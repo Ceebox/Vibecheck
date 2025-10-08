@@ -72,8 +72,7 @@ internal sealed class ReviewCommand : CommandBase
     )
     {
         using var activity = Tracing.Start();
-
-        var engine = new ReviewEngine(repoPath, null, sourceBranch, targetBranch, sourceOffset, targetOffset);
+        using var engine = new ReviewEngine(repoPath, null, sourceBranch, targetBranch, sourceOffset, targetOffset);
 
         var hasResults = false;
         await foreach (var comment in engine.Review())

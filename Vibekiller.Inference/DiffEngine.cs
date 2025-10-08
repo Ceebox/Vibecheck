@@ -11,7 +11,7 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 {
     private readonly IEnumerable<string> mDiffs;
 
-    public DiffEngine(string modelUrl, string systemPrompt, IEnumerable<string> diffs) : base(modelUrl, systemPrompt)
+    internal DiffEngine(string modelUrl, string systemPrompt, IEnumerable<string> diffs) : base(modelUrl, systemPrompt)
     {
         mDiffs = diffs;
     }
