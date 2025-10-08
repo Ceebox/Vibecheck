@@ -13,14 +13,14 @@ public static class Configuration
     {
         var defaults = new AppSettings();
 
-        if (!File.Exists(SETTINGS_FILE_NAME))
+        if (!File.Exists(SettingsPath))
         {
             sSettings = defaults;
             Save();
             return;
         }
 
-        var json = File.ReadAllText(SETTINGS_FILE_NAME);
+        var json = File.ReadAllText(SettingsPath);
         var existing = JsonSerializer.Deserialize(json, typeof(AppSettings), AppSettingsJsonContext.Default) ?? defaults;
 
         sSettings = Merge(defaults, (AppSettings)existing);
@@ -28,10 +28,13 @@ public static class Configuration
         Save();
     }
 
+    public static string SettingsPath
+        => AppContext.BaseDirectory + SETTINGS_FILE_NAME;
+
     private static void Save()
     {
         var json = JsonSerializer.Serialize(sSettings, AppSettingsJsonContext.Default.AppSettings);
-        File.WriteAllText(SETTINGS_FILE_NAME, json);
+        File.WriteAllText(SettingsPath, json);
     }
 
     private static T Merge<T>(T defaults, T overrides)
