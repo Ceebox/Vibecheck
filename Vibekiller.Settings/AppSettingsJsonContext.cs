@@ -7,6 +7,7 @@ namespace Vibekiller.Settings;
 [JsonSerializable(typeof(InferenceSettings))]
 [JsonSerializable(typeof(SamplingSettings))]
 [JsonSerializable(typeof(GitSettings))]
+[JsonSerializable(typeof(ServerSettings))]
 internal partial class AppSettingsJsonContext : JsonSerializerContext
 {
 }

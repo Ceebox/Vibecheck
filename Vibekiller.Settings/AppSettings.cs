@@ -4,4 +4,5 @@ public sealed class AppSettings
 {
     public InferenceSettings InferenceSettings { get; init; } = new();
     public GitSettings GitSettings { get; init; } = new();
+    public ServerSettings ServerSettings { get; init; } = new();
 }

@@ -18,6 +18,12 @@ internal sealed class ReviewCommand : CommandBase
             DefaultValueFactory = _ => string.Empty
         };
 
+        var diffOption = new Option<string>("--diff")
+        {
+            Description = "Directly provide a git diff string to review.",
+            DefaultValueFactory= _ => string.Empty
+        };
+
         var sourceOption = new Option<string>("--source")
         {
             Description = "The source branch to compare (defaults to current branch).",
@@ -45,6 +51,7 @@ internal sealed class ReviewCommand : CommandBase
         var cmd = new Command("review", "Review code changes in a repository.")
         {
             pathOption,
+            diffOption,
             sourceOption,
             targetOption,
             sourceOffsetOption,
@@ -54,12 +61,13 @@ internal sealed class ReviewCommand : CommandBase
         cmd.SetAction(async parsedArgs =>
         {
             var repoPath = parsedArgs.GetValue(pathOption);
+            var diffText = parsedArgs.GetValue(diffOption);
             var sourceBranch = parsedArgs.GetValue(sourceOption);
             var targetBranch = parsedArgs.GetValue(targetOption);
             var sourceOffset = parsedArgs.GetValue(sourceOffsetOption);
             var targetOffset = parsedArgs.GetValue(targetOffsetOption);
 
-            await ExecuteAsync(repoPath, sourceBranch, targetBranch, sourceOffset, targetOffset);
+            await ExecuteAsync(repoPath, diffText, sourceBranch, targetBranch, sourceOffset, targetOffset);
         });
 
         return cmd;
@@ -67,6 +75,7 @@ internal sealed class ReviewCommand : CommandBase
 
     private static async Task ExecuteAsync(
         string? repoPath,
+        string? diffText,
         string? sourceBranch,
         string? targetBranch,
         int? sourceOffset,
@@ -91,7 +100,10 @@ internal sealed class ReviewCommand : CommandBase
             ? targetOffset!.Value
             : Configuration.Current.GitSettings.GitTargetCommitOffset;
 
-        var patchGenerator = new BranchPatchSource(repoPath, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value);
+        IPatchSource patchGenerator = string.IsNullOrEmpty(diffText)
+            ? new BranchPatchSource(repoPath, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value)
+            : new TextPatchSource(diffText);
+
         using var engine = new ReviewEngine(null, patchGenerator);
 
         var hasResults = false;

@@ -10,12 +10,14 @@ namespace Vibekiller.Utility
     public static class Tracing
     {
         private const string APP_NAME = "Vibekiller";
-        private static readonly ActivitySource sActivitySource = new(APP_NAME);
+        private static ActivitySource sActivitySource = new(APP_NAME);
         private static TracerProvider? sTracerProvider = null;
         private static bool sDebug = false;
 
         public static void InitialiseTelemetry(Uri? endpoint = null)
         {
+            sActivitySource = new(APP_NAME);
+
             var tracerBuilder = Sdk.CreateTracerProviderBuilder()
                 .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(APP_NAME))
                 .AddSource(sActivitySource.Name);
@@ -38,8 +40,9 @@ namespace Vibekiller.Utility
 
         public static Activity Start([CallerMemberName] string memberName = "")
         {
+            // TODO: This is really bad! StartActivity can be null inside the server, where we want it most!
             // We should always have an activity listener, if we've not forgot to start the telemetry
-            return sActivitySource.StartActivity(memberName)!;
+            return sActivitySource.StartActivity(memberName) ?? new Activity(memberName).Start();
         }
 
         public static void Write(object message, LogLevel level)

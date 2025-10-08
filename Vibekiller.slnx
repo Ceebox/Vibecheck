@@ -3,6 +3,7 @@
   <Project Path="Vibekiller.Git.Tests/Vibekiller.Git.Tests.csproj" Id="cb61d49c-8e3a-4430-ac5a-96b91faf1166" />
   <Project Path="Vibekiller.Git/Vibekiller.Git.csproj" />
   <Project Path="Vibekiller.Inference/Vibekiller.Inference.csproj" />
+  <Project Path="Vibekiller.Server/Vibekiller.Server.csproj" Id="838a35de-2c4e-4e79-ba05-01a6dbef0309" />
   <Project Path="Vibekiller.Settings/Vibekiller.Settings.csproj" />
   <Project Path="Vibekiller.Utility/Vibekiller.Utility.csproj" />
   <Project Path="Vibekiller/Vibekiller.csproj" />

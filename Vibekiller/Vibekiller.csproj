@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vibekiller.Engine\Vibekiller.Engine.csproj" />
+    <ProjectReference Include="..\Vibekiller.Server\Vibekiller.Server.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

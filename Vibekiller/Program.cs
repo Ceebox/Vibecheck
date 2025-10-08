@@ -33,6 +33,7 @@ namespace Vibekiller
 
             rootCommand.Add(new ReviewCommand());
             rootCommand.Add(new ChatCommand());
+            rootCommand.Add(new ServerCommand());
 
             var debugCommand = new Command("debug", "Enter development mode.");
             debugCommand.SetAction(async _ =>
