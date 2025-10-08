@@ -1,7 +1,7 @@
 ﻿namespace Vibekiller.Git.Tests;
 
 [TestClass]
-public sealed class BranchDifferTests
+public sealed class PatchDifferTests
 {
     [TestMethod]
     public void ParsePatchToHunks_SingleHunk_WorksCorrectly()
@@ -17,7 +17,7 @@ public sealed class BranchDifferTests
                   }
                 """;
 
-        var hunks = BranchDiffer.ParsePatchToHunks("Example.cs", diff).ToList();
+        var hunks = PatchDiffer.ParsePatchToHunks("Example.cs", diff).ToList();
 
         Assert.IsNotNull(hunks);
 
@@ -38,7 +38,7 @@ public sealed class BranchDifferTests
     [TestMethod]
     public void ParsePatchToHunks_EmptyPatch_ReturnsEmpty()
     {
-        var hunks = BranchDiffer.ParsePatchToHunks("Empty.cs", string.Empty).ToList();
+        var hunks = PatchDiffer.ParsePatchToHunks("Empty.cs", string.Empty).ToList();
         Assert.AreEqual(0, hunks.Count);
     }
 
@@ -54,7 +54,7 @@ public sealed class BranchDifferTests
                  +new
                 """;
 
-        var hunk = BranchDiffer.ParsePatchToHunks("Sample.cs", diff).Single();
+        var hunk = PatchDiffer.ParsePatchToHunks("Sample.cs", diff).Single();
         Assert.AreEqual(3, hunk.Lines.Count);
         Assert.IsTrue(hunk.Lines.Any(l => l.Type == ChangeType.UNMODIFIED && l.Content == "unchanged line"));
         Assert.IsTrue(hunk.Lines.Any(l => l.Type == ChangeType.DELETED && l.Content == "old"));

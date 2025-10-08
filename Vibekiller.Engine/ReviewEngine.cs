@@ -47,7 +47,7 @@ namespace Vibekiller.Engine
         {
             using var activity = Tracing.Start();
 
-            var diffEngine = new BranchDiffer(
+            var patchGenerator = new BranchPatchSource(
                 mRepoPath,
                 mSourceBranch,
                 mTargetBranch,
@@ -55,7 +55,8 @@ namespace Vibekiller.Engine
                 mTargetOffset
             );
 
-            var diffs = diffEngine.GetBranchDiffs().ToList();
+            var diffEngine = new PatchDiffer(patchGenerator);
+            var diffs = diffEngine.GetDiffs().ToList();
             var inputCreator = new DiffParser(diffs);
             var inferenceResultParser = new ReviewResponseParser();
             var context = new DiffEngine(
