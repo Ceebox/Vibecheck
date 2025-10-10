@@ -22,7 +22,7 @@ public sealed class BranchPatchSource : IPatchSource
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
     public BranchPatchSource(string repoPath, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = repoPath;
+        mRepoPath = string.IsNullOrWhiteSpace(repoPath) ? "./" : repoPath;
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;
