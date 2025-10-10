@@ -26,7 +26,7 @@ namespace Vibecheck.Engine
         {
             using var activity = Tracing.Start();
 
-            var diffEngine = new PatchDiffer(mPatchSource);
+            var diffEngine = new PatchDiffer(mPatchSource, Configuration.Current.ReviewSettings.OnlyNewCode);
             var diffs = diffEngine.GetDiffs().ToList();
             var inputCreator = new DiffParser(diffs);
             using var context = await InferenceEngineFactory.CreateDiffEngine(

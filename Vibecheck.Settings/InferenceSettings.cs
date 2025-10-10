@@ -1,7 +1,7 @@
 ﻿namespace Vibecheck.Settings;
 public class InferenceSettings
 {
-    public string ModelUrl { get; set; } = "https://huggingface.co/ibm-granite/granite-4.0-micro-GGUF/resolve/main/granite-4.0-micro-Q4_K_M.gguf";
+    public string ModelUrl { get; set; } = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf";
     public string ModelApiToken { get; set; } = string.Empty;
     public string SystemPrompt { get; set; } = """
             You are an advanced senior software engineer performing automated code reviews.
