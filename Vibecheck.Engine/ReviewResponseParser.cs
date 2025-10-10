@@ -11,7 +11,8 @@ internal partial class ReviewResponseParser
     {
         PropertyNameCaseInsensitive = true,
         AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        PropertyNamingPolicy = new SnakeCaseNamingPolicy()
     };
 
     public ReviewResponseParser() { }
@@ -57,44 +58,38 @@ internal partial class ReviewResponseParser
                 candidate = $"[{candidate}]";
             }
 
-            candidate = ExtractJson(candidate);
-
-            List<ReviewComment>? parsedComment;
-            try
+            var slices = JsonArrayExtractor.ExtractAllCompleteSlices(candidate);
+            foreach (var slice in slices)
             {
-                parsedComment = JsonSerializer.Deserialize<List<ReviewComment>>(candidate, Options);
-            }
-            catch (JsonException)
-            {
-                activity.AddError("Error parsing:\n" + response);
-                continue;
-            }
-
-            if (parsedComment is null)
-            {
-                continue;
-            }
-
-            foreach (var comment in parsedComment)
-            {
-                if (comment is { HasChange: true } && !string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                List<ReviewComment>? parsedComment;
+                try
                 {
-                    yield return comment with { Path = result.Path };
+                    parsedComment = JsonSerializer.Deserialize<List<ReviewComment>>(slice, Options);
+                }
+                catch (JsonException)
+                {
+                    activity.AddError("Error parsing:\n" + response);
+                    continue;
+                }
+
+                if (parsedComment is null)
+                {
+                    continue;
+                }
+
+                foreach (var comment in parsedComment)
+                {
+                    if (comment is { HasChange: true } && !string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                    {
+                        yield return comment with { Path = result.Path };
+                    }
                 }
             }
         }
     }
 
-    private static string ExtractJson(string text)
-    {
-        var start = text.IndexOf('[');
-        var end = text.LastIndexOf(']');
-        if (start >= 0 && end > start)
-            return text[start..(end + 1)];
-        return "[]";
-    }
-
-    [GeneratedRegex(@"(\[[\s\S]*?\]|\{[\s\S]*?\})", RegexOptions.Multiline | RegexOptions.Compiled)]
+    // Thank the lord for regex builder
+    [GeneratedRegex(@"\s*(\{(?:[^{}""\\]|\\.|""(?:[^""\\]|\\.)*"")*\}|\[(?:[^\[\]""\\]|\\.|""(?:[^""\\]|\\.)*"")*\])", RegexOptions.Multiline | RegexOptions.Compiled)]
     private static partial Regex JsonExtractorRegex();
 }
 

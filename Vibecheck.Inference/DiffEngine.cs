@@ -61,8 +61,10 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
                 while (true)
                 {
+                    var bufferText = buffer.ToString().TrimStart(',', '\n', '\r', ' ');
+
                     // Check if we have a complete array and stop before the AI runs away from us!
-                    var jsonCandidate = JsonArrayExtractor.ExtractFirstCompleteArray(buffer.ToString());
+                    var jsonCandidate = JsonArrayExtractor.ExtractFirstCompleteArray(bufferText);
                     if (jsonCandidate == null)
                     {
                         break;

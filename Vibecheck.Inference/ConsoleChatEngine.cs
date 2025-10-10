@@ -1,6 +1,7 @@
 ﻿using LLama;
 using LLama.Common;
 using System.Text;
+using Vibecheck.Settings;
 
 namespace Vibecheck.Inference;
 
@@ -40,7 +41,7 @@ public sealed class ConsoleChatEngine : InferenceEngineBase<Task>
                 var inferenceParams = new InferenceParams()
                 {
                     MaxTokens = 512,
-                    AntiPrompts = ["User:", "\nUser:", "</s>", "<|eot_id|>"]
+                    AntiPrompts = Configuration.Current.InferenceSettings.AntiPrompts
                 };
 
                 await foreach (var chunk in session.ChatAsync(new ChatHistory.Message(AuthorRole.User, input), inferenceParams))
