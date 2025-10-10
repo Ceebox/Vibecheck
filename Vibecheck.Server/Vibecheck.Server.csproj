@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vibecheck.Engine\Vibecheck.Engine.csproj" />
+    <ProjectReference Include="..\Vibecheck.Settings\Vibecheck.Settings.csproj" />
+    <ProjectReference Include="..\Vibecheck.Utility\Vibecheck.Utility.csproj" />
+  </ItemGroup>
+
+</Project>

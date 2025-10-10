@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Vibecheck.Engine": {
+      "commandName": "Project",
+      "commandLineArgs": "--debug"
+    }
+  }
+}

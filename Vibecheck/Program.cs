@@ -1,0 +1,68 @@
+﻿using System.CommandLine;
+using Vibecheck.Utility;
+
+namespace Vibecheck
+{
+    /// <summary>
+    /// Entry point for the Vibecheck CLI interface.
+    /// </summary>
+    internal sealed class Program
+    {
+        // https://budavariam.github.io/asciiart-text/ (DOS Rebel)
+        private const string LOGO = """
+ █████   █████  ███  █████                       █████                        █████     
+░░███   ░░███  ░░░  ░░███                       ░░███                        ░░███      
+ ░███    ░███  ████  ░███████   ██████   ██████  ░███████    ██████   ██████  ░███ █████
+ ░███    ░███ ░░███  ░███░░███ ███░░███ ███░░███ ░███░░███  ███░░███ ███░░███ ░███░░███ 
+ ░░███   ███   ░███  ░███ ░███░███████ ░███ ░░░  ░███ ░███ ░███████ ░███ ░░░  ░██████░  
+  ░░░█████░    ░███  ░███ ░███░███░░░  ░███  ███ ░███ ░███ ░███░░░  ░███  ███ ░███░░███ 
+    ░░███      █████ ████████ ░░██████ ░░██████  ████ █████░░██████ ░░██████  ████ █████
+     ░░░      ░░░░░ ░░░░░░░░   ░░░░░░   ░░░░░░  ░░░░ ░░░░░  ░░░░░░   ░░░░░░  ░░░░ ░░░░░ 
+""";
+
+        public static async Task<int> Main(string[] args)
+        {
+            Tracing.InitialiseTelemetry(new Uri("http://localhost:4317/"));
+            Console.WriteLine(LOGO + '\n');
+
+            return await Run(args);
+        }
+
+        private static async Task<int> Run(string[] args)
+        {
+            var rootCommand = new RootCommand("Vibecheck CLI");
+            var reviewCommand = new Command("review", "Review some code.");
+
+            rootCommand.Add(new ReviewCommand());
+            rootCommand.Add(new ChatCommand());
+            rootCommand.Add(new ServerCommand());
+
+            var debugCommand = new Command("debug", "Enter development mode.");
+            debugCommand.SetAction(async _ =>
+            {
+                Tracing.SetDebug();
+
+                await rootCommand.Parse(["-h"]).InvokeAsync();
+
+                Console.Write("\nEnter command: ");
+                var newLine = Console.ReadLine();
+                if (string.IsNullOrEmpty(newLine))
+                {
+                    return;
+                }
+
+                var newArgs = newLine.Split(" ");
+                await Run(newArgs);
+            });
+
+            rootCommand.Add(debugCommand);
+
+            if (args.Length == 0)
+            {
+                return await rootCommand.Parse(["-h"]).InvokeAsync();
+            }
+
+            return await rootCommand.Parse(args).InvokeAsync();
+        }
+    }
+}

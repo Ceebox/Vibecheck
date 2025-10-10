@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Vibekiller": {
-      "commandName": "Project",
-      "commandLineArgs": "debug"
-    }
-  }
-}

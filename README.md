@@ -1,4 +1,4 @@
-# Vibekiller
+# Vibecheck
 Let's fight bad code with more bad code.
 
 ## Premise
@@ -9,12 +9,12 @@ The plan here is to (try to) fight fire with fire, to hopefully sort out some is
 
 ## Usage
 
- - Download the application from the [Releases](https://github.com/Ceebox/Vibekiller/releases) section.
+ - Download the application from the [Releases](https://github.com/Ceebox/Vibecheck/releases) section.
 	 - If desired, configure the model to be used in the `appsettings.json`.
 	 - Please note that gated models require `ModelApiToken` to be populated with your API token.
  - Switch your repository to the branch that you want to be reviewed. 
- - Execute the `vibekiller` command in your command line.
-	 - Generally, you'll want to execute something like `vibekiller review --path "path/to/your/repo" --target main`. 
+ - Execute the `vibecheck` command in your command line.
+	 - Generally, you'll want to execute something like `vibecheck review --path "path/to/your/repo" --target main`. 
 
 ## Contributing
 This is just an idea. Please don't. ;)

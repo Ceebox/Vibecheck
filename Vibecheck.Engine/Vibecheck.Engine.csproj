@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <UserSecretsId>757cc093-bb41-4aa4-b9e1-29e3bee97f7f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <ProjectReference Include="..\Vibecheck.Git\Vibecheck.Git.csproj" />
+    <ProjectReference Include="..\Vibecheck.Inference\Vibecheck.Inference.csproj" />
+    <ProjectReference Include="..\Vibecheck.Settings\Vibecheck.Settings.csproj" />
+    <ProjectReference Include="..\Vibecheck.Utility\Vibecheck.Utility.csproj" />
+  </ItemGroup>
+
+</Project>

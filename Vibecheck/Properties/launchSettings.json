@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Vibecheck": {
+      "commandName": "Project",
+      "commandLineArgs": "debug"
+    }
+  }
+}
