@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <ProjectReference Include="..\Vibecheck.Git\Vibecheck.Git.csproj" />
   </ItemGroup>
 
