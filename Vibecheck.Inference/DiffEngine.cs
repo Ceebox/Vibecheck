@@ -18,22 +18,17 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
     public override async IAsyncEnumerable<InferenceResult> Execute()
     {
-        var executor = new InteractiveExecutor(await this.GetContext());
-
-        var chatHistory = new ChatHistory();
-        chatHistory.AddMessage(AuthorRole.System, this.SystemPrompt);
-        await foreach (var chunk in ProcessDiffs(executor, chatHistory))
+        await foreach (var chunk in this.ProcessDiffs())
         {
             yield return chunk;
         }
     }
 
-    private async IAsyncEnumerable<InferenceResult> ProcessDiffs(InteractiveExecutor executor, ChatHistory chatHistory)
+    private async IAsyncEnumerable<InferenceResult> ProcessDiffs()
     {
         using var activity = Tracing.Start();
         activity.AddTag("diffs.count", mDiffs.Count());
 
-        var session = new ChatSession(executor, chatHistory);
         var inferenceParams = new InferenceParams()
         {
             MaxTokens = Configuration.Current.InferenceSettings.MaxTokens,
@@ -44,6 +39,14 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
         var hasDiffs = false;
         foreach (var diffText in mDiffs)
         {
+            await mContext.Reset();
+
+            var executor = new InteractiveExecutor(await this.GetContext());
+            var chatHistory = new ChatHistory();
+            chatHistory.AddMessage(AuthorRole.System, this.SystemPrompt);
+
+            var session = new ChatSession(executor, chatHistory);
+
             hasDiffs = true;
             var buffer = new StringBuilder();
 

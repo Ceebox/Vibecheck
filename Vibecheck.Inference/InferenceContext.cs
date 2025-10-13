@@ -1,4 +1,5 @@
 ﻿using LLama;
+using LLama.Common;
 using LLama.Native;
 using Vibecheck.Utility;
 
@@ -8,6 +9,8 @@ public sealed partial class InferenceContext : IDisposable
 {
     private readonly string mModelUrl;
 
+    private LLamaWeights? mModel;
+    private ModelParams? mParams;
     private LLamaContext? mContext;
 
     static InferenceContext()
@@ -46,6 +49,7 @@ public sealed partial class InferenceContext : IDisposable
 
     public async Task<LLamaContext> GetContext()
     {
+        using var activity = Tracing.Start();
         if (mContext == null)
         {
             await this.Load();
@@ -54,15 +58,41 @@ public sealed partial class InferenceContext : IDisposable
         return mContext!;
     }
 
+    public async Task Reset()
+    {
+        using var activity = Tracing.Start();
+        this.DisposeContext();
+
+        if (mModel == null || mParams == null)
+        {
+            await this.Load();
+        }
+        else
+        {
+            mContext = mModel.CreateContext(mParams);
+        }
+    }
+
     private async Task Load()
     {
+        using var activity = Tracing.Start();
         var modelLoader = new ModelLoader(mModelUrl);
-        var model = await modelLoader.Fetch();
-        mContext = model.CreateContext(modelLoader.ModelParams);
+        mModel = await modelLoader.Fetch();
+        mParams = modelLoader.ModelParams;
+        mContext = mModel.CreateContext(mParams);
+    }
+
+    private void DisposeContext()
+    {
+        mContext?.Dispose();
+        mContext = null;
     }
 
     public void Dispose()
     {
-        mContext?.Dispose();
+        GC.SuppressFinalize(this);
+
+        DisposeContext();
+        mModel?.Dispose();
     }
 }
