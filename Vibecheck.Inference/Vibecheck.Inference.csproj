@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Vibecheck.Inference.Tools\Vibecheck.Inference.Tools.csproj" />
     <ProjectReference Include="..\Vibecheck.Settings\Vibecheck.Settings.csproj" />
     <ProjectReference Include="..\Vibecheck.Utility\Vibecheck.Utility.csproj" />
   </ItemGroup>

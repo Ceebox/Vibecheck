@@ -7,12 +7,11 @@ namespace Vibecheck.Engine;
 
 internal partial class ReviewResponseParser
 {
-    private static readonly JsonSerializerOptions Options = new()
+    private static readonly JsonSerializerOptions sOptions = new()
     {
-        PropertyNameCaseInsensitive = true,
         AllowTrailingCommas = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+        Converters = { new ReviewCommentConverter() },
     };
 
     public ReviewResponseParser() { }
@@ -58,13 +57,12 @@ internal partial class ReviewResponseParser
                 candidate = $"[{candidate}]";
             }
 
-            var slices = JsonArrayExtractor.ExtractAllCompleteSlices(candidate);
-            foreach (var slice in slices)
+            foreach (var slice in JsonArrayExtractor.ExtractObjectsAsArray(candidate))
             {
-                List<ReviewComment>? parsedComment;
+                ReviewComment? parsedComment;
                 try
                 {
-                    parsedComment = JsonSerializer.Deserialize<List<ReviewComment>>(slice, Options);
+                    parsedComment = JsonSerializer.Deserialize<ReviewComment>(slice, sOptions);
                 }
                 catch (JsonException)
                 {
@@ -77,12 +75,9 @@ internal partial class ReviewResponseParser
                     continue;
                 }
 
-                foreach (var comment in parsedComment)
+                if (parsedComment is { HasChange: true } && !string.IsNullOrWhiteSpace(parsedComment.SuggestedChange))
                 {
-                    if (comment is { HasChange: true } && !string.IsNullOrWhiteSpace(comment.SuggestedChange))
-                    {
-                        yield return comment with { Path = result.Path };
-                    }
+                    yield return parsedComment with { Path = result.Path };
                 }
             }
         }

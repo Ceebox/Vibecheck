@@ -48,6 +48,8 @@ internal sealed class ReviewCommand : CommandBase
             DefaultValueFactory = _ => 0
         };
 
+        targetOffsetOption.Aliases.Add("--drop");
+
         var cmd = new Command("review", "Review code changes in a repository.")
         {
             pathOption,

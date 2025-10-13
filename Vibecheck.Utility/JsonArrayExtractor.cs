@@ -6,9 +6,81 @@ namespace Vibecheck.Utility;
 /// A lot of models will run away and keep generating tokens following completing a valid array.
 /// This class is intended to detect a valid array and put a stop to that.
 /// </summary>
-/// <devnote>I really need to refactor this logic.</devnote>
+/// <devnote>I really need to refactor this logic. This class contains a lot of dead code.</devnote>
 public static partial class JsonArrayExtractor
 {
+    /// <summary>
+    /// Extracts every complete object `{...}` in the text and wraps each in an array.
+    /// </summary>
+    public static string[] ExtractObjectsAsArray(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return [];
+        }
+
+        var objects = new List<string>();
+        var objectDepth = 0;
+        var inString = false;
+        var escape = false;
+        var startIndex = -1;
+
+        for (var i = 0; i < text.Length; i++)
+        {
+            var c = text[i];
+
+            if (escape)
+            {
+                escape = false;
+                continue;
+            }
+
+            if (c == '\\' && inString)
+            {
+                escape = true;
+                continue;
+            }
+
+            if (c == '"' && !escape)
+            {
+                inString = !inString;
+                continue;
+            }
+
+            if (!inString)
+            {
+                if (c == '{')
+                {
+                    if (startIndex == -1)
+                    {
+                        startIndex = i;
+                    }
+
+                    objectDepth++;
+                }
+                else if (c == '}')
+                {
+                    objectDepth--;
+
+                    if (objectDepth == 0 && startIndex >= 0)
+                    {
+                        objects.Add(text[startIndex..(i + 1)].Trim());
+
+                        // Reset
+                        startIndex = -1;
+                    }
+                }
+            }
+        }
+
+        if (objects.Count == 0)
+        {
+            return [];
+        }
+
+        return [.. objects];
+    }
+
     /// <summary>
     /// Extracts the first complete array or object from the text.
     /// If the first complete object is a single object, wraps it in an array.

@@ -22,7 +22,7 @@ public class InferenceSettings
             ]
 
             Rules:
-            Always output a **JSON array** (`[]`) — never an object or text.
+            Always output a single **JSON array** (`[]`) — never an object or text.
             If there are **no issues**, return an **empty array**: `[]`.
             Each array element represents **one review comment** for the diff.
             `"has_change"` is required in each object.
@@ -35,7 +35,7 @@ public class InferenceSettings
             Do not describe the changes. **Only suggest improvements to the new code**.
             You MUST output valid JSON.
             Do NOT add extra text, extra brackets, or role indicators.
-            Do NOT include "User:" anywhere.
+            Do NOT include "User:" anywhere, even at the end - just end abruptly after the ].
             """;
     public string CodeStylePrompt { get; set; } = string.Empty;
     public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema.\r\n[";

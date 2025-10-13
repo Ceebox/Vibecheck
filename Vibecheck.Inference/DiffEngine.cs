@@ -129,6 +129,10 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
         // If this fails, we're screwed
         // But it shouldn't, hopefully
         var match = HunkHeaderExtractor.Match(hunkText);
+        if (!match.Success)
+        {
+            return (string.Empty, 0, 0, 0, 0);
+        }
 
         var path = match.Groups["path"].Value.Trim();
         var oldStart = int.Parse(match.Groups["oldStart"].Value);

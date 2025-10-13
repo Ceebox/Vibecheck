@@ -1,6 +1,7 @@
 ﻿using LLama;
 using LLama.Common;
 using LLama.Native;
+using Vibecheck.Inference.Tools;
 using Vibecheck.Utility;
 
 namespace Vibecheck.Inference;
@@ -9,6 +10,7 @@ public sealed partial class InferenceContext : IDisposable
 {
     private readonly string mModelUrl;
 
+    private ToolHost? mToolHost;
     private LLamaWeights? mModel;
     private ModelParams? mParams;
     private LLamaContext? mContext;
@@ -77,9 +79,15 @@ public sealed partial class InferenceContext : IDisposable
         }
     }
 
+    public IEnumerable<ToolInfo> GetToolInfo()
+        => mToolHost?.GetAllToolInfo();
+
     private async Task Load()
     {
         using var activity = Tracing.Start();
+        mToolHost = new ToolHost();
+        mToolHost.Load();
+
         var modelLoader = new ModelLoader(mModelUrl);
         mModel = await modelLoader.Fetch();
         mParams = modelLoader.ModelParams;
