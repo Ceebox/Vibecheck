@@ -15,12 +15,6 @@ public sealed class DiffParser
     public IEnumerable<string> FormatDiffs()
     {
         using var activity = Tracing.Start();
-
-        if (!mDiffs.Any())
-        {
-            yield break;
-        }
-
         foreach (var hunk in mDiffs)
         {
             yield return FormatHunk(hunk);

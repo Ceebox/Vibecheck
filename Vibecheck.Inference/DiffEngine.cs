@@ -41,14 +41,10 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
             SamplingPipeline = new SettingBasedSamplingPipeline(Configuration.Current.InferenceSettings.SamplingSettings)
         };
 
-        if (!mDiffs.Any())
-        {
-            Tracing.WriteLine("No diffs found.", LogLevel.INFO);
-            yield break;
-        }
-
+        var hasDiffs = false;
         foreach (var diffText in mDiffs)
         {
+            hasDiffs = true;
             var buffer = new StringBuilder();
 
             var parsedHeader = ParseHunkHeader(diffText);
@@ -92,6 +88,11 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
             // New line, otherwise everything is smushed
             Tracing.Write("\n", LogLevel.INFO);
+        }
+
+        if (!hasDiffs)
+        {
+            Tracing.WriteLine("No diffs found.", LogLevel.INFO);
         }
     }
 
