@@ -20,17 +20,18 @@ namespace Vibecheck.Utility
             var output = message.ToString()!;
             switch (logLevel)
             {
-                case LogLevel.WARNING:
-                    activity.AddWarning(output);
-                    break;
-
                 case LogLevel.ERROR:
                     activity.AddError(output);
                     break;
 
-                case LogLevel.DEBUG:
-                case LogLevel.NONE:
+                case LogLevel.WARNING:
+                    activity.AddWarning(output);
+                    break;
+
                 case LogLevel.INFO:
+                case LogLevel.DEBUG:
+                case LogLevel.EVERYTHING:
+                case LogLevel.NONE:
                 default:
                     activity.SetStatus(ActivityStatusCode.Ok);
                     activity.AddEvent(new ActivityEvent(output));

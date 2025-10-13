@@ -7,6 +7,7 @@ internal static class ConsoleHelpers
 
         Console.ForegroundColor = logLevel switch
         {
+            LogLevel.EVERYTHING => ConsoleColor.DarkGray,
             LogLevel.DEBUG => ConsoleColor.Gray,
             LogLevel.NONE => ConsoleColor.White,
             LogLevel.INFO => ConsoleColor.Blue,
@@ -26,6 +27,7 @@ internal static class ConsoleHelpers
 
         Console.ForegroundColor = logLevel switch
         {
+            LogLevel.EVERYTHING => ConsoleColor.DarkGray,
             LogLevel.DEBUG => ConsoleColor.Gray,
             LogLevel.NONE => ConsoleColor.White,
             LogLevel.INFO => ConsoleColor.Blue,
