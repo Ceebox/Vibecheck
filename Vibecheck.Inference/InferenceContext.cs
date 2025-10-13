@@ -25,8 +25,12 @@ public sealed partial class InferenceContext : IDisposable
         {
             if (level == LLamaLogLevel.Warning)
             {
-                // Write because these end with a newline
-                Tracing.Write(message, LogLevel.WARNING);
+                // We get a lot of useless warnings, wrap them behind this
+                if (Tracing.DebugLevel == LogLevel.EVERYTHING)
+                {
+                    // Write because these end with a newline
+                    Tracing.Write(message, LogLevel.WARNING);
+                }
             }
             else if (level == LLamaLogLevel.Error)
             {

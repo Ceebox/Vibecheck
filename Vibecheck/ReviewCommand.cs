@@ -58,6 +58,8 @@ internal sealed class ReviewCommand : CommandBase
             targetOffsetOption
         };
 
+        cmd.Aliases.Add("r");
+
         cmd.SetAction(async parsedArgs =>
         {
             var repoPath = parsedArgs.GetValue(pathOption);

@@ -28,34 +28,15 @@ namespace Vibecheck
             return await Run(args);
         }
 
-        private static async Task<int> Run(string[] args)
+        public static async Task<int> Run(string[] args)
         {
-            var rootCommand = new RootCommand("Vibecheck CLI");
-            var reviewCommand = new Command("review", "Review some code.");
-
-            rootCommand.Add(new ReviewCommand());
-            rootCommand.Add(new ChatCommand());
-            rootCommand.Add(new ServerCommand());
-
-            var debugCommand = new Command("debug", "Enter development mode.");
-            debugCommand.SetAction(async _ =>
+            var rootCommand = new RootCommand("Vibecheck CLI")
             {
-                Tracing.SetDebug();
-
-                await rootCommand.Parse(["-h"]).InvokeAsync();
-
-                Console.Write("\nEnter command: ");
-                var newLine = Console.ReadLine();
-                if (string.IsNullOrEmpty(newLine))
-                {
-                    return;
-                }
-
-                var newArgs = newLine.Split(" ");
-                await Run(newArgs);
-            });
-
-            rootCommand.Add(debugCommand);
+                new ReviewCommand(),
+                new ChatCommand(),
+                new ServerCommand(),
+                new DebugCommand()
+            };
 
             if (args.Length == 0)
             {
