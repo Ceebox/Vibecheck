@@ -12,7 +12,7 @@ namespace Vibecheck.Utility
         private const string APP_NAME = "Vibecheck";
         private static ActivitySource sActivitySource = new(APP_NAME);
         private static TracerProvider? sTracerProvider = null;
-        private static bool sDebug = false;
+        private static LogLevel sDebugLevel = LogLevel.NONE;
 
         public static void InitialiseTelemetry(Uri? endpoint = null)
         {
@@ -51,7 +51,7 @@ namespace Vibecheck.Utility
             activity.AddTag("debug.message", message);
             activity.AddTag("debug.level", level);
 
-            if (sDebug)
+            if (sDebugLevel >= level)
             {
                 ConsoleHelpers.PrettyPrint(message, level);
             }
@@ -63,18 +63,18 @@ namespace Vibecheck.Utility
             activity.AddTag("debug.message", message);
             activity.AddTag("debug.level", level);
 
-            if (sDebug)
+            if (sDebugLevel != LogLevel.NONE)
             {
                 ConsoleHelpers.PrettyPrintLine(message, level);
             }
         }
 
-        public static void SetDebug()
+        public static void SetDebug(LogLevel logLevel = LogLevel.DEBUG)
         {
-            sDebug = true;
+            sDebugLevel = logLevel;
         }
 
-        public static bool Debug
-            => sDebug;
+        public static LogLevel DebugLevel
+            => sDebugLevel;
     }
 }
