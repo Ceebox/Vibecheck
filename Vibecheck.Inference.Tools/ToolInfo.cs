@@ -1,7 +1,7 @@
 ﻿namespace Vibecheck.Inference.Tools;
 
+///<remarks>I'm considering making Description required, otherwise I reckon the AI will struggle.</remarks>
 public sealed record ToolInfo
 {
-    public required string Name { get; init; }
-    public required string Description { get; init; }
+    public List<ToolMethodInfo> Methods { get; set; } = [];
 }

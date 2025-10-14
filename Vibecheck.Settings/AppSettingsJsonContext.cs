@@ -7,6 +7,7 @@ namespace Vibecheck.Settings;
 [JsonSerializable(typeof(InferenceSettings))]
 [JsonSerializable(typeof(SamplingSettings))]
 [JsonSerializable(typeof(GitSettings))]
+[JsonSerializable(typeof(ToolSettings))]
 [JsonSerializable(typeof(ReviewSettings))]
 [JsonSerializable(typeof(ServerSettings))]
 internal partial class AppSettingsJsonContext : JsonSerializerContext

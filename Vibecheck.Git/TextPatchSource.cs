@@ -11,6 +11,8 @@ public sealed partial class TextPatchSource : IPatchSource
         mPatchText = patchText ?? throw new ArgumentNullException(nameof(patchText));
     }
 
+    public string? PatchRootDirectory => null;
+
     public IEnumerable<PatchInfo> GetPatchInfo()
     {
         if (string.IsNullOrWhiteSpace(mPatchText))

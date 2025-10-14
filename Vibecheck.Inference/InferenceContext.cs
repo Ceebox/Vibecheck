@@ -2,6 +2,7 @@
 using LLama.Common;
 using LLama.Native;
 using Vibecheck.Inference.Tools;
+using Vibecheck.Settings;
 using Vibecheck.Utility;
 
 namespace Vibecheck.Inference;
@@ -10,7 +11,7 @@ public sealed partial class InferenceContext : IDisposable
 {
     private readonly string mModelUrl;
 
-    private ToolHost? mToolHost;
+    private readonly ToolHost? mToolHost;
     private LLamaWeights? mModel;
     private ModelParams? mParams;
     private LLamaContext? mContext;
@@ -28,7 +29,7 @@ public sealed partial class InferenceContext : IDisposable
             if (level == LLamaLogLevel.Warning)
             {
                 // We get a lot of useless warnings, wrap them behind this
-                if (Tracing.DebugLevel == LogLevel.EVERYTHING)
+                if (Tracing.DebugLevel == LogLevel.VERBOSE)
                 {
                     // Write because these end with a newline
                     Tracing.Write(message, LogLevel.WARNING);
@@ -51,14 +52,22 @@ public sealed partial class InferenceContext : IDisposable
     public InferenceContext(string modelUrl)
     {
         mModelUrl = modelUrl;
+        if (Configuration.Current.ToolSettings.ToolsEnabled)
+        {
+            mToolHost = new ToolHost();
+            mToolHost.Load();
+        }
     }
+
+    public ToolContext? ToolContext
+        => mToolHost?.ToolContext;
 
     public async Task<LLamaContext> GetContext()
     {
         using var activity = Tracing.Start();
         if (mContext == null)
         {
-            await this.Load();
+            await this.LoadModel();
         }
 
         return mContext!;
@@ -71,7 +80,7 @@ public sealed partial class InferenceContext : IDisposable
 
         if (mModel == null || mParams == null)
         {
-            await this.Load();
+            await this.LoadModel();
         }
         else
         {
@@ -79,15 +88,23 @@ public sealed partial class InferenceContext : IDisposable
         }
     }
 
-    public IEnumerable<ToolInfo> GetToolInfo()
-        => mToolHost?.GetAllToolInfo();
+    public string GetToolInfo()
+        => mToolHost?.GetToolContextJson() ?? string.Empty;
 
-    private async Task Load()
+    public object? InvokeTool(ToolInvocation invocation)
+        => mToolHost?.InvokeTool(invocation);
+
+    private void LoadTools()
+    {
+        if (mToolHost != null && !mToolHost.Loaded)
+        {
+            mToolHost.Load();
+        }
+    }
+
+    private async Task LoadModel()
     {
         using var activity = Tracing.Start();
-        mToolHost = new ToolHost();
-        mToolHost.Load();
-
         var modelLoader = new ModelLoader(mModelUrl);
         mModel = await modelLoader.Fetch();
         mParams = modelLoader.ModelParams;

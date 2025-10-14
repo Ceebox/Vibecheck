@@ -16,7 +16,7 @@ internal sealed class SnakeCaseNamingPolicy : JsonNamingPolicy
         }
 
         var parts = name.Split('_', StringSplitOptions.RemoveEmptyEntries);
-        var pascal = string.Concat(parts.Select(p => char.ToUpperInvariant(p[0]) + p.Substring(1)));
+        var pascal = string.Concat(parts.Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
         return pascal;
     }
 }

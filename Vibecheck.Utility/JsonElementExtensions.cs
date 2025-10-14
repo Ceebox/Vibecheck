@@ -10,10 +10,15 @@ public static class JsonElementExtensions
 
     public static JsonElement? GetProperty(this JsonElement element, string name, bool optional = false)
     {
-        if (element.TryGetProperty(name, out var prop))
+        try
         {
-            return prop;
+            if (element.TryGetProperty(name, out var prop))
+            {
+                return prop;
+            }
         }
+        catch (Exception) { }
+
         if (optional)
         {
             return default;

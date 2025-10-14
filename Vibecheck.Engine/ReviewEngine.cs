@@ -34,7 +34,13 @@ namespace Vibecheck.Engine
                 Configuration.Current.InferenceSettings.SystemPrompt,
                 [.. inputCreator.FormatDiffs()]
             );
-            
+
+            var toolContext = context.ToolContext;
+            if (toolContext != null)
+            {
+                toolContext.RepositoryPath = mPatchSource?.PatchRootDirectory;
+            }
+
             await foreach (var response in context.Execute())
             {
                 foreach (var comment in ReviewResponseParser.ParseResponse(response))

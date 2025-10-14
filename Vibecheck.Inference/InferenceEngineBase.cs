@@ -1,4 +1,5 @@
 ﻿using LLama;
+using Vibecheck.Inference.Tools;
 
 namespace Vibecheck.Inference;
 
@@ -6,15 +7,6 @@ public abstract class InferenceEngineBase : IDisposable
 {
     public event EventHandler? Disposed;
 
-    public virtual void Dispose()
-    {
-        GC.SuppressFinalize(this);
-        this.Disposed?.Invoke(this, EventArgs.Empty);
-    }
-}
-
-public abstract class InferenceEngineBase<T> : InferenceEngineBase
-{
     private protected readonly InferenceContext mContext;
     private readonly string mSystemPrompt;
 
@@ -24,16 +16,17 @@ public abstract class InferenceEngineBase<T> : InferenceEngineBase
         mSystemPrompt = CleanSystemPrompt(systemPrompt);
     }
 
-    public abstract T Execute();
-
-    public override void Dispose()
+    public virtual void Dispose()
     {
         GC.SuppressFinalize(this);
         mContext.Dispose();
-        base.Dispose();
+        this.Disposed?.Invoke(this, EventArgs.Empty);
     }
 
-    internal async Task<LLamaContext> GetContext()
+    public ToolContext? ToolContext
+        => mContext?.ToolContext;
+
+    internal async Task<LLamaContext> GetLlamaContext()
     {
         return await mContext.GetContext();
     }
@@ -56,5 +49,18 @@ public abstract class InferenceEngineBase<T> : InferenceEngineBase
         newPrompt = newPrompt.Replace("\u0027", string.Empty);
         newPrompt = newPrompt.Replace("\u0060", string.Empty);
         return newPrompt;
+    }
+}
+
+public abstract class InferenceEngineBase<T> : InferenceEngineBase
+{
+    public InferenceEngineBase(string modelUrl, string systemPrompt) : base(modelUrl, systemPrompt) { }
+
+    public abstract T Execute();
+
+    public override void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        base.Dispose();
     }
 }

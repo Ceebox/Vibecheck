@@ -22,12 +22,14 @@ public sealed class BranchPatchSource : IPatchSource
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
     public BranchPatchSource(string repoPath, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = string.IsNullOrWhiteSpace(repoPath) ? "./" : repoPath;
+        mRepoPath = Repository.Discover(string.IsNullOrWhiteSpace(repoPath) ? "./" : repoPath);
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;
         mTargetOffset = targetOffset;
     }
+
+    public string? PatchRootDirectory => Path.GetDirectoryName(mRepoPath.TrimEnd(Path.DirectorySeparatorChar))!;
 
     public IEnumerable<PatchInfo> GetPatchInfo()
     {
@@ -39,9 +41,7 @@ public sealed class BranchPatchSource : IPatchSource
         activity.AddTag("git.source_offset", mSourceOffset);
         activity.AddTag("git.target_offset", mTargetOffset);
 
-        var repoPath = Repository.Discover(mRepoPath);
-        using var repo = new Repository(repoPath);
-
+        using var repo = new Repository(mRepoPath);
         var current = repo.Head;
         var target = repo.Branches[mTargetBranch];
         if (target == null)

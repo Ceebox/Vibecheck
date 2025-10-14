@@ -8,6 +8,6 @@
         SUCCESS = 2,
         INFO = 4,
         DEBUG = 8,
-        EVERYTHING = 16,
+        VERBOSE = 16,
     }
 }

@@ -14,6 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="..\Vibecheck.Git\Vibecheck.Git.csproj" />
+    <ProjectReference Include="..\Vibecheck.Inference.Tools.Builtin\Vibecheck.Inference.Tools.Builtin.csproj" />
     <ProjectReference Include="..\Vibecheck.Inference\Vibecheck.Inference.csproj" />
     <ProjectReference Include="..\Vibecheck.Settings\Vibecheck.Settings.csproj" />
     <ProjectReference Include="..\Vibecheck.Utility\Vibecheck.Utility.csproj" />

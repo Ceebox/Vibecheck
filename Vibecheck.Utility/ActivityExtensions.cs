@@ -30,7 +30,7 @@ namespace Vibecheck.Utility
 
                 case LogLevel.INFO:
                 case LogLevel.DEBUG:
-                case LogLevel.EVERYTHING:
+                case LogLevel.VERBOSE:
                 case LogLevel.NONE:
                 default:
                     activity.SetStatus(ActivityStatusCode.Ok);
