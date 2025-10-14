@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+﻿using System.Collections.Concurrent;
+using System.CommandLine;
 using System.Text;
 using Vibecheck.Engine;
 using Vibecheck.Git;
@@ -110,35 +111,43 @@ internal sealed class ReviewCommand : CommandBase
 
         using var engine = new ReviewEngine(null, patchGenerator);
 
-        var hasResults = false;
+        // TODO: Add some sort of loading indicator here
+        var results = new ConcurrentStack<ReviewComment>();
         await foreach (var comment in engine.Review())
         {
-            hasResults = true;
-
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Path: {comment.Path}");
-            Console.ResetColor();
-
-            Console.WriteLine($"Comment: {comment.Comment}");
-
-            if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Suggested Change: {comment.SuggestedChange}");
-                Console.ResetColor();
-            }
-
-            if (comment.AiProbability.HasValue)
-            {
-                PrintProbabilityBar(comment.AiProbability.Value);
-            }
-
-            Console.WriteLine();
+            Tracing.WriteLine($"New comment detected: {comment.Comment}", LogLevel.SUCCESS);
+            results.Push(comment);
         }
 
-        if (!hasResults)
+        var hasResults = results.IsEmpty;
+        if (hasResults)
         {
             Console.WriteLine("No review comments found.");
+        }
+        else
+        {
+            foreach (var comment in results)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"Path: {comment.Path}");
+                Console.ResetColor();
+
+                Console.WriteLine($"Comment: {comment.Comment}");
+
+                if (!string.IsNullOrWhiteSpace(comment.SuggestedChange))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Suggested Change: {comment.SuggestedChange}");
+                    Console.ResetColor();
+                }
+
+                if (comment.AiProbability.HasValue)
+                {
+                    PrintProbabilityBar(comment.AiProbability.Value);
+                }
+
+                Console.WriteLine();
+            }
         }
 
         activity.SetTag("review.hasResults", hasResults);
