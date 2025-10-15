@@ -110,8 +110,8 @@ internal sealed class WatchCommand : CommandBase
         {
             Tracing.WriteLine($"New comment detected: {comment.Comment}", LogLevel.SUCCESS);
             renderer.QueueMessage(comment);
-
-            notificationProvider?.SendNotification($"New feedback: {comment.Comment}");
         }
+
+        notificationProvider?.SendNotification("You have new feedback!");
     }
 }
