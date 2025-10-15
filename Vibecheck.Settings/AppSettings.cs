@@ -7,4 +7,5 @@ public sealed class AppSettings
     public ToolSettings ToolSettings { get; init; } = new();
     public ReviewSettings ReviewSettings { get; init; } = new();
     public ServerSettings ServerSettings { get; init; } = new();
+    public WatcherSettings WatcherSettings { get; init; } = new();
 }

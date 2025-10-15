@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Runtime.InteropServices;
 using Vibecheck.Engine;
 using Vibecheck.Git;
 using Vibecheck.Settings;
@@ -69,15 +70,25 @@ internal sealed class WatchCommand : CommandBase
             ? Configuration.Current.GitSettings.GitTargetBranch
             : targetBranch;
 
+        INotificationProvider? notificationProvider = null;
+        if (Configuration.Current.WatcherSettings.NotificationSettings.NotificationsEnabled)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                notificationProvider = new WindowsNotificationProvider();
+            }
+        }
+
         using var watcher = new FolderCommitWatcher(repositoryPath!);
 
-        watcher.CommitDetected += (_, e) => _ = HandleCommitAsync(e, sourceBranch, targetBranch);
+        watcher.CommitDetected += (_, e) => _ = HandleCommitAsync(e, notificationProvider, sourceBranch, targetBranch);
 
         await watcher.RunAsync();
     }
 
     private static async Task HandleCommitAsync(
         WatcherEventArgs e,
+        INotificationProvider? notificationProvider,
         string sourceBranch,
         string targetBranch
     )
@@ -102,6 +113,8 @@ internal sealed class WatchCommand : CommandBase
         {
             Tracing.WriteLine($"New comment detected: {comment.Comment}", LogLevel.SUCCESS);
             renderer.QueueMessage(comment);
+
+            notificationProvider?.SendNotification($"New feedback: {comment.Comment}");
         }
     }
 }
