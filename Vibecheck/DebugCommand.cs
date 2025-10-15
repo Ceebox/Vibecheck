@@ -1,7 +1,9 @@
 ﻿using System.CommandLine;
+using Vibecheck.Engine;
 using Vibecheck.Utility;
 
 namespace Vibecheck;
+
 internal sealed class DebugCommand : CommandBase
 {
     public override Command ToCommand()
@@ -21,6 +23,17 @@ internal sealed class DebugCommand : CommandBase
             }
 
             var newArgs = newLine.Split(" ");
+            if (newArgs.Length >= 2)
+            {
+                // We're really debugging now!
+                if (newArgs[0] == "notification")
+                {
+                    var notificationProvider = NotificationProviderFactory.GetNotificationProvider();
+                    notificationProvider?.SendNotification(string.Join(' ', newArgs[1..]));
+                    return;
+                }
+            }
+
             await Program.Run(newArgs);
         });
 

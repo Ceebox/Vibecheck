@@ -3,14 +3,22 @@ using System.Runtime.InteropServices;
 
 namespace Vibecheck.Engine;
 
+/// <summary>
+/// Sends notifications to the current Windows device.
+/// </summary>
 public sealed class WindowsNotificationProvider : INotificationProvider
 {
+    internal WindowsNotificationProvider() { }
+
     /// <summary>
     /// Sends a toast notification via PowerShell on Windows.
     /// </summary>
     /// <param name="message">The notification message.</param>
     public void SendNotification(string message)
     {
+        // TODO: This doesn't work at all. I need to think of other ways to do this.
+        // https://github.com/Ceebox/Vibecheck/issues/17
+
         // Yeah, this is HACKY!
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {

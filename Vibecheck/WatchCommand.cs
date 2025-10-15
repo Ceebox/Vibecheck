@@ -73,10 +73,7 @@ internal sealed class WatchCommand : CommandBase
         INotificationProvider? notificationProvider = null;
         if (Configuration.Current.WatcherSettings.NotificationSettings.NotificationsEnabled)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                notificationProvider = new WindowsNotificationProvider();
-            }
+            notificationProvider = NotificationProviderFactory.GetNotificationProvider();
         }
 
         using var watcher = new FolderCommitWatcher(repositoryPath!);
