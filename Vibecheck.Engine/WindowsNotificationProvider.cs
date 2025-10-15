@@ -21,23 +21,25 @@ public sealed class WindowsNotificationProvider : INotificationProvider
         {
             // Escape quotes, or we will have an issue
             var escapedMessage = message.Replace("\"", "`\"");
-            var psScript = $"""
-                $ToastXml = @"
-                < toast >
-                    < visual >
-                    < binding template = 'ToastGeneric' >
-                        < text > Vibecheck Notification </ text >
-                        < text >{escapedMessage}</ text >
-                    </ binding >
-                    </ visual >
-                </ toast >
-                "@
-                $xml = New - Object Windows.Data.Xml.Dom.XmlDocument
-                $xml.LoadXml($ToastXml)
-                $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-                $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Vibecheck')
-                $notifier.Show($toast)
-                """;
+
+            // I have been having issues with triple quotes breaking this
+            var psScript = $@"
+$ToastXml = @'
+<toast>
+  <visual>
+    <binding template='ToastGeneric'>
+      <text>Vibecheck Notification</text>
+      <text>{escapedMessage}</text>
+    </binding>
+  </visual>
+</toast>
+'@
+$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$xml.LoadXml($ToastXml)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Vibecheck')
+$notifier.Show($toast)
+";
 
             var psi = new ProcessStartInfo("powershell.exe")
             {
