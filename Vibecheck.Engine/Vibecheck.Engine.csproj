@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
     <UserSecretsId>757cc093-bb41-4aa4-b9e1-29e3bee97f7f</UserSecretsId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Management" Version="9.0.10" />
     <ProjectReference Include="..\Vibecheck.Git\Vibecheck.Git.csproj" />
     <ProjectReference Include="..\Vibecheck.Inference.Tools.Builtin\Vibecheck.Inference.Tools.Builtin.csproj" />
     <ProjectReference Include="..\Vibecheck.Inference\Vibecheck.Inference.csproj" />

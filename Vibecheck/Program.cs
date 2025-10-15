@@ -30,11 +30,13 @@ namespace Vibecheck
 
         public static async Task<int> Run(string[] args)
         {
+            // TODO: Load via reflection
             var rootCommand = new RootCommand("Vibecheck CLI")
             {
                 new ReviewCommand(),
                 new ChatCommand(),
                 new ServerCommand(),
+                new WatchCommand(),
                 new DebugCommand()
             };
 
