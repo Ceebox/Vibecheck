@@ -92,7 +92,7 @@ internal sealed class WatchCommand : CommandBase
     {
         // TODO: This is deeply flawed, I have no idea what happens if you commit multiple times
         var patchGenerator = new BranchPatchSource(
-            e.RepositoryPath,
+            RepositoryFinder.Discover(e.RepositoryPath),
             string.IsNullOrEmpty(e.Branch)
                 ? sourceBranch
                 : e.Branch,

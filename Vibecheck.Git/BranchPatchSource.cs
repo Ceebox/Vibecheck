@@ -20,9 +20,9 @@ public sealed class BranchPatchSource : IPatchSource
     /// <param name="targetBranch">The branch or tag to diff against (e.g., main).</param>
     /// <param name="sourceOffset">Number of commits back from the source branch HEAD.</param>
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
-    public BranchPatchSource(string repoPath, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
+    public BranchPatchSource(RepositoryFinder repoFinder, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = Repository.Discover(string.IsNullOrWhiteSpace(repoPath) ? "./" : repoPath);
+        mRepoPath = repoFinder.Root;
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;

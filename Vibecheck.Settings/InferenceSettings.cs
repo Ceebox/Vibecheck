@@ -54,4 +54,5 @@ public class InferenceSettings
     public int ContextLimit { get; set; } = 1;
     public string[] AntiPrompts { get; set; } = ["User:", "\nUser:", "]User", "User ", "User: ", "</s>", "<|eot_id|>"];
     public SamplingSettings SamplingSettings { get; set; } = new();
+    public VectorDatabaseSettings VectorDatabaseSettings { get; set; } = new();
 }

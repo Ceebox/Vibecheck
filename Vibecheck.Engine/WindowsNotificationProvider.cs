@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Vibecheck.Utility;
 
 namespace Vibecheck.Engine;
 
@@ -16,6 +17,8 @@ public sealed class WindowsNotificationProvider : INotificationProvider
     /// <param name="message">The notification message.</param>
     public void SendNotification(string message)
     {
+        using var activity = Tracing.Start();
+
         // TODO: This doesn't work at all. I need to think of other ways to do this.
         // https://github.com/Ceebox/Vibecheck/issues/17
 
@@ -63,7 +66,7 @@ $notifier.Show($toast)
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to send PowerShell toast notification: {ex.Message}");
+            activity.AddError(ex);
         }
     }
 }

@@ -2,6 +2,7 @@
   <Project Path="Vibecheck.Engine/Vibecheck.Engine.csproj" />
   <Project Path="Vibecheck.Git.Tests/Vibecheck.Git.Tests.csproj" Id="cb61d49c-8e3a-4430-ac5a-96b91faf1166" />
   <Project Path="Vibecheck.Git/Vibecheck.Git.csproj" />
+  <Project Path="Vibecheck.Inference.Data/Vibecheck.Inference.Data.csproj" Id="681ce3de-1218-4454-863c-4f802ec370e6" />
   <Project Path="Vibecheck.Inference.Tests/Vibecheck.Utility.Tests.fsproj" Id="ff435e34-634c-43e1-8c90-3e48093a7e2e" />
   <Project Path="Vibecheck.Inference.Tools.Builtin/Vibecheck.Inference.Tools.Builtin.csproj" Id="6f778523-26fe-48c9-9af7-215336a6de44" />
   <Project Path="Vibecheck.Inference.Tools/Vibecheck.Inference.Tools.csproj" Id="928ed1cb-f26a-4f96-a69e-d4e93bf2bacd" />

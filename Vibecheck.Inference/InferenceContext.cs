@@ -12,42 +12,8 @@ public sealed partial class InferenceContext : IDisposable
     private readonly string mModelUrl;
 
     private readonly ToolHost? mToolHost;
-    private LLamaWeights? mModel;
-    private ModelParams? mParams;
+    private ModelData? mModelData;
     private LLamaContext? mContext;
-
-    static InferenceContext()
-    {
-        // This code is inside the static constructor because we can't have any pre-created configurations
-
-        // Use Vulkan
-        // TODO: Allow other backends, e.g. CPU, CUDA
-        NativeLibraryConfig.All.WithVulkan(true);
-
-        NativeLibraryConfig.All.WithLogCallback((level, message) =>
-        {
-            if (level == LLamaLogLevel.Warning)
-            {
-                // We get a lot of useless warnings, wrap them behind this
-                if (Tracing.DebugLevel == LogLevel.VERBOSE)
-                {
-                    // Write because these end with a newline
-                    Tracing.Write(message, LogLevel.WARNING);
-                }
-            }
-            else if (level == LLamaLogLevel.Error)
-            {
-                // Write because these end with a newline
-                Tracing.Write(message, LogLevel.ERROR);
-            }
-
-            // This is important, it means we are on the CPU instead
-            if (level == LLamaLogLevel.Warning && message.Contains("cannot be used with preferred buffer type Vulkan_Host"))
-            {
-                Tracing.WriteLine("Unable to run this model on the GPU - using CPU instead.", LogLevel.ERROR);
-            }
-        });
-    }
 
     public InferenceContext(string modelUrl)
     {
@@ -78,13 +44,13 @@ public sealed partial class InferenceContext : IDisposable
         using var activity = Tracing.Start();
         this.DisposeContext();
 
-        if (mModel == null || mParams == null)
+        if (mModelData is null)
         {
             await this.LoadModel();
         }
         else
         {
-            mContext = mModel.CreateContext(mParams);
+            mContext = InferenceFactory.CreateContext(mModelData);
         }
     }
 
@@ -94,21 +60,12 @@ public sealed partial class InferenceContext : IDisposable
     public object? InvokeTool(ToolInvocation invocation)
         => mToolHost?.InvokeTool(invocation);
 
-    private void LoadTools()
-    {
-        if (mToolHost != null && !mToolHost.Loaded)
-        {
-            mToolHost.Load();
-        }
-    }
-
     private async Task LoadModel()
     {
         using var activity = Tracing.Start();
-        var modelLoader = new ModelLoader(mModelUrl);
-        mModel = await modelLoader.Fetch();
-        mParams = modelLoader.ModelParams;
-        mContext = mModel.CreateContext(mParams);
+
+        mModelData = await InferenceFactory.LoadModelDataAsync(mModelUrl);
+        mContext = InferenceFactory.CreateContext(mModelData);
     }
 
     private void DisposeContext()
@@ -122,6 +79,6 @@ public sealed partial class InferenceContext : IDisposable
         GC.SuppressFinalize(this);
 
         DisposeContext();
-        mModel?.Dispose();
+        mModelData?.Dispose();
     }
 }

@@ -89,9 +89,12 @@ internal sealed class ReviewCommand : CommandBase
     {
         using var activity = Tracing.Start();
 
-        repoPath = string.IsNullOrEmpty(repoPath)
-            ? string.Empty
-            : repoPath;
+        var repoFinder = RepositoryFinder.Discover(
+            string.IsNullOrEmpty(repoPath)
+                ? "./"
+                : repoPath
+        );
+
         sourceBranch = string.IsNullOrEmpty(sourceBranch)
             ? Configuration.Current.GitSettings.GitSourceBranch
             : sourceBranch;
@@ -106,7 +109,7 @@ internal sealed class ReviewCommand : CommandBase
             : Configuration.Current.GitSettings.GitTargetCommitOffset;
 
         IPatchSource patchGenerator = string.IsNullOrEmpty(diffText)
-            ? new BranchPatchSource(repoPath, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value)
+            ? new BranchPatchSource(repoFinder, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value)
             : new TextPatchSource(diffText);
 
         using var engine = new ReviewEngine(null, patchGenerator);
