@@ -22,7 +22,7 @@ public sealed class BranchPatchSource : IPatchSource
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
     public BranchPatchSource(RepositoryFinder repoFinder, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = repoFinder.GitRoot;
+        mRepoPath = repoFinder.GitRoot ?? throw new InvalidOperationException("Invalid Git repo");
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;

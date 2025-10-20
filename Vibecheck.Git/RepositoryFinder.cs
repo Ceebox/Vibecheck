@@ -35,5 +35,5 @@ public sealed class RepositoryFinder
     private static string? DiscoverRepoRoot(string path)
         => Repository.Discover(path);
 
-    public override string ToString() => mRepoRoot.Value;
+    public override string ToString() => mRepoRoot.Value ?? string.Empty;
 }

@@ -56,7 +56,6 @@ public sealed class VectorDatabaseInterface : IDisposable
             if (parts.Take(parts.Length - 1).Any(p => Configuration.Current.InferenceSettings.VectorDatabaseSettings.ExcludedFolders.Contains(p)))
                 return false;
 
-            // Optionally: filter by extension
             return Configuration.Current.InferenceSettings.VectorDatabaseSettings
                                 .IncludedFileTypes.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase);
         }).ToList();

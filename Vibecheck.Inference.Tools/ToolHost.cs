@@ -106,22 +106,38 @@ public sealed class ToolHost : IDisposable
     /// Get information about all loaded tools.
     /// </summary>
     public IEnumerable<ToolInfo> GetAllToolInfo()
-        => mToolClasses.Select(c => new ToolInfo()
-        {
-            Methods = [.. c.Methods.Select(m => new ToolMethodInfo()
+        => mToolClasses
+            .Select(c => new ToolInfo()
             {
-                Name = m.Method.Name,
-                Description = m.Attribute.Description,
-                Parameters = [.. m.Parameters
-                    .Where(p => p.Parameter.ParameterType != typeof(ToolContext))
-                    .Select(p => new ToolParameterInfo()
+                // Only select methods where they are availble, or don't have a predicate
+                Methods = [.. c.Methods
+                    .Where(m => 
                     {
-                        Name = p.Parameter.Name ?? string.Empty,
-                        Description = p.Attribute?.Description ?? string.Empty,
-                        Type = p.Parameter.ParameterType
-                    })]
-            })]
-        });
+                        if (m.Attribute.AvailabilityType is not null)
+                        {
+                            var instance = (IToolAvailability)Activator.CreateInstance(m.Attribute.AvailabilityType);
+                            return instance?.IsAvailable(mToolContext) ?? true;
+                        }
+
+                        // True by default
+                        return true;
+                    })
+                    .Select(m => new ToolMethodInfo()
+                    {
+                        Name = m.Method.Name,
+                        Description = m.Attribute.Description,
+                        Parameters = [.. m.Parameters
+                            .Where(p => p.Parameter.ParameterType != typeof(ToolContext))
+                            .Select(p => new ToolParameterInfo()
+                            {
+                                Name = p.Parameter.Name ?? string.Empty,
+                                Description = p.Attribute?.Description ?? string.Empty,
+                                Type = p.Parameter.ParameterType
+                            })]
+                    })
+                ]
+            })
+            .Where(t => t.Methods.Any());
 
     public string GetToolContextJson()
     {
@@ -405,6 +421,7 @@ public sealed class ToolHost : IDisposable
         public MethodInfo Method { get; }
         public ToolMethodAttribute Attribute { get; }
         public List<ToolParameterInfoInternal> Parameters { get; }
+        public Predicate<ToolContext>? IsAvailable { get; }
 
         public ToolMethodInfoInternal(MethodInfo method, ToolMethodAttribute attribute, List<ToolParameterInfoInternal> parameters)
         {

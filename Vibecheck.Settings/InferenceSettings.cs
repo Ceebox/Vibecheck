@@ -38,7 +38,7 @@ public class InferenceSettings
             Do NOT include "User:" anywhere, even at the end - just end abruptly after the ].
             """;
     public string CodeStylePrompt { get; set; } = string.Empty;
-    public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema. Try executing the fuzzy finder tool here: \r\n[";
+    public string CompletionPrompt { get; set; } = "Complete the following JSON array describing code review comments, matching the schema. Try executing the vector search tool here: \r\n[";
     public int ContextWindowSize { get; set; } = 4096;
     public int GpuLayerCount { get; set; } = -1;
     public int MaxTokens { get; set; } = 128;
