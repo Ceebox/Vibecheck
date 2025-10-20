@@ -37,33 +37,52 @@ public sealed class VectorDatabase
         }
     }
 
-    public void Add(VectorRecord record)
+    public async Task AddAsync(VectorRecord record)
     {
         using var activity = Tracing.Start();
         activity.AddTag("vector.filepath", record.FilePath);
         activity.AddTag("vector.id", record.Id);
 
         var existing = mRecords.FindIndex(r => r.Id == record.Id);
+
         if (existing >= 0)
         {
             mRecords[existing] = record;
 
             if (mIndex.TryGetValue(record.Id, out var idx))
             {
-                using var fs = new FileStream(mVecsPath, FileMode.Open, FileAccess.Write, FileShare.None);
+                await using var fs = new FileStream(
+                    mVecsPath,
+                    FileMode.Open,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 4096,
+                    useAsync: true
+                );
+
                 fs.Position = idx.Offset;
-                var buffer = MemoryMarshal.Cast<float, byte>(record.Embedding.AsSpan());
-                fs.Write(buffer);
+                var buffer = MemoryMarshal.Cast<float, byte>(record.Embedding.AsSpan()).ToArray();
+                await fs.WriteAsync(buffer.AsMemory());
                 return;
             }
         }
         else
         {
             mRecords.Add(record);
-            using var fs = new FileStream(mVecsPath, FileMode.Append, FileAccess.Write, FileShare.None);
+
+            await using var fs = new FileStream(
+                mVecsPath,
+                FileMode.Append,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 4096,
+                useAsync: true
+            );
+
             var offset = fs.Position;
-            var buffer = MemoryMarshal.Cast<float, byte>(record.Embedding.AsSpan());
-            fs.Write(buffer);
+            var buffer = MemoryMarshal.Cast<float, byte>(record.Embedding.AsSpan()).ToArray();
+            await fs.WriteAsync(buffer.AsMemory());
+
             mIndex[record.Id] = (offset, buffer.Length);
         }
     }

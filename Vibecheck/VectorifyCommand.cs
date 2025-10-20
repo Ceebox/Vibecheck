@@ -9,7 +9,7 @@ namespace Vibecheck;
 /// <summary>
 /// A smart person would call this the "vectorise" command but some people can't agree on spelling.
 /// </summary>
-internal class VectorifyCommand : CommandBase
+internal sealed class VectorifyCommand : CommandBase
 {
     public override Command ToCommand()
     {
@@ -25,6 +25,9 @@ internal class VectorifyCommand : CommandBase
         {
             pathArgument,
         };
+
+        cmd.Aliases.Add("vectorise");
+        cmd.Aliases.Add("vectorize"); // Darn Americans! (yee haw)
 
         cmd.SetAction(async parsedArgs =>
         {
@@ -47,10 +50,14 @@ internal class VectorifyCommand : CommandBase
     {
         using var activity = Tracing.Start();
 
-        var modelData = await InferenceFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
-        var embedder = InferenceFactory.CreateEmbedder(modelData);
+        var codeRoot = RepositoryFinder.Discover(repositoryPath).CodeRoot;
+        if (string.IsNullOrEmpty(codeRoot))
+        {
+            return;
+        }
 
-        var dbManager = new VectorDatabaseInterface(RepositoryFinder.Discover(repositoryPath).Root, embedder);
+        var modelData = await InferenceFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
+        var dbManager = new VectorDatabaseInterface(codeRoot, modelData);
         await dbManager.VectoriseAsync();
     }
 }

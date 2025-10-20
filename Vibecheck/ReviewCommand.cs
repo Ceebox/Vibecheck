@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.CommandLine;
-using System.Text;
 using Vibecheck.Engine;
 using Vibecheck.Git;
 using Vibecheck.Settings;
@@ -9,6 +8,8 @@ using Vibecheck.Utility;
 namespace Vibecheck;
 internal sealed class ReviewCommand : CommandBase
 {
+    public override int Precedence => 10;
+
     public override Command ToCommand()
     {
         using var activity = Tracing.Start();

@@ -10,6 +10,9 @@ public static class JsonElementExtensions
 
     public static JsonElement? GetProperty(this JsonElement element, string name, bool optional = false)
     {
+        using var activity = Tracing.Start();
+        activity.SetTag("property.name", name);
+
         try
         {
             if (element.TryGetProperty(name, out var prop))
@@ -17,7 +20,10 @@ public static class JsonElementExtensions
                 return prop;
             }
         }
-        catch (Exception) { }
+        catch (Exception ex)
+        {
+            activity.AddError(ex);
+        }
 
         if (optional)
         {

@@ -16,4 +16,10 @@ public sealed class VectorDatabaseSettings
         ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".sqf",
         ".lua", ".rake", ".make", ".mk", ".gradle", ".dockerfile", ".gitignore"
     ];
+
+    public string[] ExcludedFolders { get; set; } = [
+        "bin",
+        "obj",
+        ".git"
+    ];
 }

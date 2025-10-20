@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Reflection;
 using Vibecheck.Utility;
 
 namespace Vibecheck
@@ -30,19 +31,11 @@ namespace Vibecheck
 
         public static async Task<int> Run(string[] args)
         {
-            // TODO: Load via reflection
-            var rootCommand = new RootCommand("Vibecheck CLI")
-            {
-                new ReviewCommand(),
-                new ChatCommand(),
-                new ServerCommand(),
-                new WatchCommand(),
-                new DebugCommand()
-            };
-
+            var rootCommand = CommandHelpers.CreatRootCommand();
             if (args.Length == 0)
             {
-                return await rootCommand.Parse(["-h"]).InvokeAsync();
+                // We might need help!
+                args = ["--help"];
             }
 
             return await rootCommand.Parse(args).InvokeAsync();

@@ -15,14 +15,14 @@ public sealed class BranchPatchSource : IPatchSource
     /// <summary>
     /// Creates a BranchDiffer for comparing the current branch to the target branch.
     /// </summary>
-    /// <param name="repoPath">Path to the Git repository.</param>
+    /// <param name="repoFinder">The Git repository.</param>
     /// <param name="sourceBranch">The branch to use as the "current" branch (typically HEAD).</param>
     /// <param name="targetBranch">The branch or tag to diff against (e.g., main).</param>
     /// <param name="sourceOffset">Number of commits back from the source branch HEAD.</param>
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
     public BranchPatchSource(RepositoryFinder repoFinder, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = repoFinder.Root;
+        mRepoPath = repoFinder.GitRoot;
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;

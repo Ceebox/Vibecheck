@@ -5,18 +5,23 @@ namespace Vibecheck.Git;
 public sealed class RepositoryFinder
 {
     private readonly string mStartPath;
-    private readonly Lazy<string> mRepoRoot;
+    private readonly Lazy<string?> mRepoRoot;
 
     private RepositoryFinder(string startPath)
     {
         mStartPath = startPath;
-        mRepoRoot = new Lazy<string>(() => DiscoverRepoRoot(mStartPath) ?? string.Empty);
+        mRepoRoot = new Lazy<string?>(() => DiscoverRepoRoot(mStartPath));
     }
 
     /// <summary>
     /// Returns the root folder of the git repository containing startPath, or null if not found.
     /// </summary>
-    public string Root => mRepoRoot.Value;
+    public string? GitRoot => mRepoRoot.Value;
+
+    /// <summary>
+    /// Returns the parent folder of the git repository containing startPath, or null if not found.
+    /// </summary>
+    public string? CodeRoot => Path.GetDirectoryName(mRepoRoot.Value?.TrimEnd(Path.DirectorySeparatorChar));
 
     /// <summary>
     /// Factory method to create a RepositoryFinder starting from a folder.

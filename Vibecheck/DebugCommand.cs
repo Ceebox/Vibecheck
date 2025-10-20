@@ -6,6 +6,8 @@ namespace Vibecheck;
 
 internal sealed class DebugCommand : CommandBase
 {
+    public override int Precedence => -1;
+
     public override Command ToCommand()
     {
         var debugCommand = new Command("debug", "Enter development mode.");
@@ -14,7 +16,7 @@ internal sealed class DebugCommand : CommandBase
         {
             Tracing.SetDebug();
 
-            await new RootCommand().Parse(["-h"]).InvokeAsync();
+            await CommandHelpers.CreatRootCommand().Parse(["-h"]).InvokeAsync();
             Console.Write("\nEnter command: ");
             var newLine = Console.ReadLine();
             if (string.IsNullOrEmpty(newLine))

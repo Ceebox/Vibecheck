@@ -7,6 +7,8 @@ namespace Vibecheck;
 
 internal class ServerCommand : CommandBase
 {
+    public override int Precedence => 9;
+
     public override Command ToCommand()
     {
         using var activity = Tracing.Start();
