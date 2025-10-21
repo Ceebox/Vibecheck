@@ -10,6 +10,8 @@ namespace Vibecheck.Inference.Data;
 /// </summary>
 public sealed class VectorDatabase
 {
+    private const string DATABASE_FOLDER = "database_cache";
+
     private static readonly JsonSerializerOptions sOptions = new()
     {
         WriteIndented = true,
@@ -36,6 +38,20 @@ public sealed class VectorDatabase
             }
         }
     }
+
+    public static string GetDatabasePath(string rootFolder)
+    {
+        var databaseCacheDir = Path.Combine(AppContext.BaseDirectory, DATABASE_FOLDER);
+        if (!Directory.Exists(databaseCacheDir))
+        {
+            Directory.CreateDirectory(databaseCacheDir);
+        }
+
+        return Path.Combine(databaseCacheDir, Path.GetFileName(rootFolder) + ".json");
+    }
+
+    public bool IsIndexed
+        => File.Exists(mJsonPath);
 
     public async Task AddAsync(VectorRecord record)
     {

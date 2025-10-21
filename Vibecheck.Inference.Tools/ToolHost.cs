@@ -115,7 +115,7 @@ public sealed class ToolHost : IDisposable
                     {
                         if (m.Attribute.AvailabilityType is not null)
                         {
-                            var instance = (IToolAvailability)Activator.CreateInstance(m.Attribute.AvailabilityType);
+                            var instance = Activator.CreateInstance(m.Attribute.AvailabilityType) as IToolAvailability;
                             return instance?.IsAvailable(mToolContext) ?? true;
                         }
 
@@ -137,7 +137,7 @@ public sealed class ToolHost : IDisposable
                     })
                 ]
             })
-            .Where(t => t.Methods.Any());
+            .Where(t => t.Methods.Count != 0);
 
     public string GetToolContextJson()
     {

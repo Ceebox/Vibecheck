@@ -103,7 +103,7 @@ internal sealed class WatchCommand : CommandBase
             1
         );
 
-        using var engine = new ReviewEngine(null, patchGenerator);
+        using var engine = new ReviewEngine(patchGenerator);
 
         var renderer = new ReviewCommentConsoleRenderer(true);
         await foreach (var comment in engine.Review())

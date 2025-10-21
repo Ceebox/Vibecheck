@@ -1,5 +1,6 @@
 ﻿using Vibecheck.Git;
 using Vibecheck.Inference;
+using Vibecheck.Inference.Tools;
 using Vibecheck.Settings;
 using Vibecheck.Utility;
 
@@ -7,18 +8,12 @@ namespace Vibecheck.Engine
 {
     public sealed class ReviewEngine : IDisposable
     {
-        private readonly string mModelUrl;
         private readonly IPatchSource mPatchSource;
 
         public ReviewEngine(
-            string? modelUrl,
             IPatchSource patchSource
         )
         {
-            mModelUrl = string.IsNullOrEmpty(modelUrl)
-                ? Configuration.Current.InferenceSettings.ModelUrl
-                : modelUrl;
-
             mPatchSource = patchSource;
         }
 
@@ -40,6 +35,7 @@ namespace Vibecheck.Engine
             if (toolContext != null)
             {
                 toolContext.RepositoryPath = mPatchSource?.PatchRootDirectory;
+                VectorSearchContextHost.SetContext(new VectorSearchContext(mPatchSource?.PatchRootDirectory ?? string.Empty, data));
             }
 
             await foreach (var response in context.Execute())

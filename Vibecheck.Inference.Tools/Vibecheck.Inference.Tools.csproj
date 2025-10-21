@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vibecheck.Inference.Data\Vibecheck.Inference.Data.csproj" />
     <ProjectReference Include="..\Vibecheck.Utility\Vibecheck.Utility.csproj" />
   </ItemGroup>
 

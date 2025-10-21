@@ -1,15 +1,8 @@
-﻿using System.Text.Json;
-
-namespace Vibecheck.Inference.Tools.Builtin;
+﻿namespace Vibecheck.Inference.Tools.Builtin;
 
 [ToolClass]
 public sealed class VectorSearcher
 {
-    private static readonly JsonSerializerOptions sOptions = new JsonSerializerOptions()
-    {
-        WriteIndented = true
-    };
-
     [ToolMethod(
         Description = "Perform a vector search through an indexed portion of the codebase.",
         AvailabilityType = typeof(VectorSearchAvailability)
@@ -17,18 +10,17 @@ public sealed class VectorSearcher
     public static string? VectorSearch(
         ToolContext toolContext,
         [ToolParameter(Description = "The file or file path to search for.")]
-        string searchPath
+        string searchQuery
     )
     {
-        var db = toolContext.VectorDatabase!;
-
-        var results = db.Search([]);
-        return JsonSerializer.Serialize(results, sOptions);
+        var db = toolContext.VectorContext!;
+        var results = db.Search(searchQuery);
+        return results;
     }
 
     public sealed class VectorSearchAvailability : IToolAvailability
     {
         public bool IsAvailable(ToolContext ctx)
-            => ctx.VectorDatabase is not null;
+            => ctx.VectorContext is not null && ctx.VectorContext.IsIndexed();
     }
 }

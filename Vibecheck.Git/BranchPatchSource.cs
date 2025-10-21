@@ -6,7 +6,7 @@ namespace Vibecheck.Git;
 
 public sealed class BranchPatchSource : IPatchSource
 {
-    private readonly string mRepoPath;
+    private readonly RepositoryFinder mRepoFinder;
     private readonly string mSourceBranch;
     private readonly string mTargetBranch;
     private readonly int mSourceOffset;
@@ -22,26 +22,27 @@ public sealed class BranchPatchSource : IPatchSource
     /// <param name="targetOffset">Number of commits back from the target branch HEAD.</param>
     public BranchPatchSource(RepositoryFinder repoFinder, string sourceBranch, string targetBranch, int sourceOffset = 0, int targetOffset = 0)
     {
-        mRepoPath = repoFinder.GitRoot ?? throw new InvalidOperationException("Invalid Git repo");
+        mRepoFinder = repoFinder;
         mSourceBranch = sourceBranch;
         mTargetBranch = targetBranch;
         mSourceOffset = sourceOffset;
         mTargetOffset = targetOffset;
     }
 
-    public string? PatchRootDirectory => Path.GetDirectoryName(mRepoPath.TrimEnd(Path.DirectorySeparatorChar))!;
+    public string? PatchRootDirectory => mRepoFinder.CodeRoot;
 
     public IEnumerable<PatchInfo> GetPatchInfo()
     {
         using var activity = Tracing.Start();
+        var repoPath = mRepoFinder.GitRoot;
 
-        activity.AddTag("git.repo_path", mRepoPath);
+        activity.AddTag("git.repo_path", repoPath);
         activity.AddTag("git.source_branch", mSourceBranch);
         activity.AddTag("git.target_branch", mTargetBranch);
         activity.AddTag("git.source_offset", mSourceOffset);
         activity.AddTag("git.target_offset", mTargetOffset);
 
-        using var repo = new Repository(mRepoPath);
+        using var repo = new Repository(repoPath);
         var current = repo.Head;
         var target = repo.Branches[mTargetBranch];
         if (target == null)

@@ -5,7 +5,7 @@ using Vibecheck.Utility;
 
 namespace Vibecheck.Inference;
 
-public sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
+internal sealed class ModelLoader : IFetcher<LLamaWeights>, IDisposable
 {
     private const string CACHE_FOLDER = "model_cache";
     private readonly string mModelUrl;

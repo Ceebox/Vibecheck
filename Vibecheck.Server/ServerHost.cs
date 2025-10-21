@@ -37,7 +37,7 @@ public class ServerHost
                 return;
             }
 
-            using var engine = new ReviewEngine(null, patchGenerator);
+            using var engine = new ReviewEngine(patchGenerator);
 
             var results = new List<ReviewComment>();
             await foreach (var result in engine.Review())

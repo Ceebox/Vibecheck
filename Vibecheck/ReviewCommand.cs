@@ -113,7 +113,7 @@ internal sealed class ReviewCommand : CommandBase
             ? new BranchPatchSource(repoFinder, sourceBranch, targetBranch, sourceOffset.Value, targetOffset.Value)
             : new TextPatchSource(diffText);
 
-        using var engine = new ReviewEngine(null, patchGenerator);
+        using var engine = new ReviewEngine(patchGenerator);
 
         // TODO: Add some sort of loading indicator here
         var renderer = new ReviewCommentConsoleRenderer(false);

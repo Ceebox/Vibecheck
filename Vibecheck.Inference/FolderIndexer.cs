@@ -1,21 +1,18 @@
-﻿using LLama;
-using System.Text;
+﻿using System.Text;
 using Vibecheck.Inference.Data;
 using Vibecheck.Settings;
 using Vibecheck.Utility;
 
 namespace Vibecheck.Inference;
 
-public sealed class VectorDatabaseInterface : IDisposable
+public sealed class FolderIndexer : IDisposable
 {
-    private const string DATABASE_FOLDER = "database_cache";
-
     private readonly VectorDatabase mDatabase;
     private readonly ModelData mEmbedderData;
     private readonly string mRootFolder;
     private readonly string mDatabasePath;
 
-    public VectorDatabaseInterface(string rootFolder, ModelData embedderData)
+    public FolderIndexer(string rootFolder, ModelData embedderData)
     {
         if (string.IsNullOrEmpty(rootFolder))
         {
@@ -26,13 +23,7 @@ public sealed class VectorDatabaseInterface : IDisposable
         mEmbedderData = embedderData;
         mRootFolder = rootFolder;
 
-        var databaseCacheDir = Path.Combine(AppContext.BaseDirectory, DATABASE_FOLDER);
-        if (!Directory.Exists(databaseCacheDir))
-        {
-            Directory.CreateDirectory(databaseCacheDir);
-        }
-
-        mDatabasePath = Path.Combine(databaseCacheDir, Path.GetFileName(rootFolder) + ".json");
+        mDatabasePath = VectorDatabase.GetDatabasePath(rootFolder);
         mDatabase = new VectorDatabase(mDatabasePath);
     }
 
@@ -71,7 +62,7 @@ public sealed class VectorDatabaseInterface : IDisposable
 
                 // We need to recreate the context per-file
                 var embedding = await LlamaItemFactory.CreateEmbedder(mEmbedderData).GetEmbeddings(text);
-                if (!embedding.Any())
+                if (embedding.Any())
                 {
                     // Store relative path as ID to ensure uniqueness
                     var relativePath = Path.GetRelativePath(mRootFolder, file);
@@ -101,6 +92,6 @@ public sealed class VectorDatabaseInterface : IDisposable
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        GC.SuppressFinalize(this);
     }
 }
