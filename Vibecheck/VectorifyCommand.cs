@@ -56,7 +56,7 @@ internal sealed class VectorifyCommand : CommandBase
             return;
         }
 
-        var modelData = await InferenceFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
+        var modelData = await InferenceEngineFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
         var dbManager = new VectorDatabaseInterface(codeRoot, modelData);
         await dbManager.VectoriseAsync();
     }
