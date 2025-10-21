@@ -10,9 +10,9 @@ public abstract class InferenceEngineBase : IDisposable
     private protected readonly InferenceContext mContext;
     private readonly string mSystemPrompt;
 
-    public InferenceEngineBase(string modelUrl, string systemPrompt)
+    public InferenceEngineBase(ModelData modelData, string systemPrompt)
     {
-        mContext = new InferenceContext(modelUrl);
+        mContext = new InferenceContext(modelData);
         mSystemPrompt = CleanSystemPrompt(systemPrompt);
     }
 
@@ -26,9 +26,9 @@ public abstract class InferenceEngineBase : IDisposable
     public ToolContext? ToolContext
         => mContext?.ToolContext;
 
-    internal async Task<LLamaContext> GetLlamaContext()
+    internal LLamaContext GetLlamaContext()
     {
-        return await mContext.GetContext();
+        return mContext.GetContext();
     }
 
     internal string SystemPrompt
@@ -54,7 +54,7 @@ public abstract class InferenceEngineBase : IDisposable
 
 public abstract class InferenceEngineBase<T> : InferenceEngineBase
 {
-    public InferenceEngineBase(string modelUrl, string systemPrompt) : base(modelUrl, systemPrompt) { }
+    public InferenceEngineBase(ModelData modelData, string systemPrompt) : base(modelData, systemPrompt) { }
 
     public abstract T Execute();
 

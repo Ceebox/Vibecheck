@@ -18,11 +18,20 @@ public static class InferenceEngineFactory
     private static readonly ConcurrentQueue<TaskCompletionSource<InferenceEngineBase>> sQueue =
         new();
 
-    public static async Task<DiffEngine> CreateDiffEngine(string modelUrl, string systemPrompt, IEnumerable<string> diffs)
-        => await CreateEngineAsync(() => new DiffEngine(modelUrl, systemPrompt, diffs));
+    /// <summary>
+    /// Fetches weights and parameters from a model URL. Can be reused across contexts.
+    /// </summary>
+    public static async Task<ModelData> LoadModelDataAsync(string modelUrl)
+    {
+        var loader = new ModelLoader(modelUrl);
+        return new ModelData(loader.ModelParams, await loader.Fetch());
+    }
 
-    public static async Task<ConsoleChatEngine> CreateChatEngine(string modelUrl, string systemPrompt)
-        => await CreateEngineAsync(() => new ConsoleChatEngine(modelUrl, systemPrompt));
+    public static async Task<DiffEngine> CreateDiffEngineAsync(ModelData modelData, string systemPrompt, IEnumerable<string> diffs)
+        => await CreateEngineAsync(() => new DiffEngine(modelData, systemPrompt, diffs));
+
+    public static async Task<ConsoleChatEngine> CreateChatEngineAsync(ModelData modelData, string systemPrompt)
+        => await CreateEngineAsync(() => new ConsoleChatEngine(modelData, systemPrompt));
 
     private static async Task<T> CreateEngineAsync<T>(Func<T> factory, CancellationToken cancellationToken = default) where T : InferenceEngineBase
     {

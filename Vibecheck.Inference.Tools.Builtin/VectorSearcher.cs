@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System.Text.Json;
-using Vibecheck.Inference.Tools;
-using Vibecheck.Utility;
+﻿using System.Text.Json;
 
 namespace Vibecheck.Inference.Tools.Builtin;
 
@@ -23,9 +20,8 @@ public sealed class VectorSearcher
         string searchPath
     )
     {
-        var db = toolContext.VectorDatabase;
+        var db = toolContext.VectorDatabase!;
 
-        // TODO: Get embeddings
         var results = db.Search([]);
         return JsonSerializer.Serialize(results, sOptions);
     }

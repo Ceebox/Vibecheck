@@ -70,7 +70,7 @@ public sealed class VectorDatabaseInterface : IDisposable
                 var text = await File.ReadAllTextAsync(file, Encoding.UTF8);
 
                 // We need to recreate the context per-file
-                var embedding = await InferenceFactory.CreateEmbedder(mEmbedderData).GetEmbeddings(text);
+                var embedding = await LlamaItemFactory.CreateEmbedder(mEmbedderData).GetEmbeddings(text);
                 if (!embedding.Any())
                 {
                     // Store relative path as ID to ensure uniqueness

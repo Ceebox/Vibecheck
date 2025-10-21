@@ -20,7 +20,7 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
 
     private readonly IEnumerable<string> mDiffs;
 
-    internal DiffEngine(string modelUrl, string systemPrompt, IEnumerable<string> diffs) : base(modelUrl, systemPrompt)
+    internal DiffEngine(ModelData modelData, string systemPrompt, IEnumerable<string> diffs) : base(modelData, systemPrompt)
     {
         mDiffs = diffs;
     }
@@ -49,9 +49,9 @@ public sealed partial class DiffEngine : InferenceEngineBase<IAsyncEnumerable<In
         var hasDiffs = false;
         foreach (var diffText in mDiffs)
         {
-            await mContext.Reset();
+            mContext.Reset();
 
-            var executor = new InteractiveExecutor(await this.GetLlamaContext());
+            var executor = new InteractiveExecutor(this.GetLlamaContext());
             var chatHistory = new ChatHistory();
             chatHistory.AddMessage(AuthorRole.System, this.SystemPrompt);
 

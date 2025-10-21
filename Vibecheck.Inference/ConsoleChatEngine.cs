@@ -7,8 +7,8 @@ namespace Vibecheck.Inference;
 
 public sealed class ConsoleChatEngine : InferenceEngineBase<Task>
 {
-    internal ConsoleChatEngine(string modelUrl, string systemPrompt)
-    : base(modelUrl, systemPrompt)
+    internal ConsoleChatEngine(ModelData modelData, string systemPrompt)
+        : base(modelData, systemPrompt)
     {
     }
 
@@ -16,7 +16,7 @@ public sealed class ConsoleChatEngine : InferenceEngineBase<Task>
     {
         // TODO: Probably refactor out the input logic from here to make it more pure?
         // In the future we can send requests to this with a chat, ya know, stuff like that
-        var executor = new InteractiveExecutor(await this.GetLlamaContext());
+        var executor = new InteractiveExecutor(this.GetLlamaContext());
         var chatHistory = new ChatHistory();
         chatHistory.AddMessage(AuthorRole.System, this.SystemPrompt);
 

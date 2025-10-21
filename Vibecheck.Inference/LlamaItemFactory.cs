@@ -1,13 +1,12 @@
 ﻿using LLama;
-using LLama.Common;
 using LLama.Native;
 using Vibecheck.Utility;
 
 namespace Vibecheck.Inference;
 
-public static class InferenceFactory
+internal static class LlamaItemFactory
 {
-    static InferenceFactory()
+    static LlamaItemFactory()
     {
         // This code is inside the static constructor because we can't have any pre-created configurations
 
@@ -38,19 +37,6 @@ public static class InferenceFactory
                 Tracing.WriteLine("Unable to run this model on the GPU - using CPU instead.", LogLevel.ERROR);
             }
         });
-    }
-
-    /// <summary>
-    /// Fetches weights and parameters from a model URL. Can be reused across contexts.
-    /// </summary>
-    public static async Task<ModelData> LoadModelDataAsync(string modelUrl)
-    {
-        var loader = new ModelLoader(modelUrl);
-        return new ModelData()
-        {
-            Parameters = loader.ModelParams,
-            Weights = await loader.Fetch()
-        };
     }
 
     /// <summary>

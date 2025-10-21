@@ -5,8 +5,17 @@ namespace Vibecheck.Inference;
 
 public sealed class ModelData : IDisposable
 {
-    public required ModelParams Parameters { get; init; }
-    public required LLamaWeights Weights { get; init; }
+    private readonly ModelParams mParameters;
+    private readonly LLamaWeights mWeights;
+
+    internal ModelData(ModelParams parameters, LLamaWeights weights)
+    {
+        mParameters = parameters;
+        mWeights = weights;
+    }
+
+    internal ModelParams Parameters => mParameters;
+    internal LLamaWeights Weights => mWeights;
 
     public void Dispose()
     {

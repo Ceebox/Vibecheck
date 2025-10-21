@@ -29,8 +29,9 @@ namespace Vibecheck.Engine
             var diffEngine = new PatchDiffer(mPatchSource, Configuration.Current.ReviewSettings.OnlyNewCode);
             var diffs = diffEngine.GetDiffs().ToList();
             var inputCreator = new DiffParser(diffs);
-            using var context = await InferenceEngineFactory.CreateDiffEngine(
-                mModelUrl,
+            using var data = await InferenceEngineFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
+            using var context = await InferenceEngineFactory.CreateDiffEngineAsync(
+                data,
                 Configuration.Current.InferenceSettings.SystemPrompt,
                 [.. inputCreator.FormatDiffs()]
             );

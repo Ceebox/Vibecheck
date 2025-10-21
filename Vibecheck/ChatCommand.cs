@@ -25,8 +25,9 @@ internal sealed class ChatCommand : CommandBase
     private static async Task ExecuteAsync()
     {
         using var activity = Tracing.Start();
-        using var engine = await InferenceEngineFactory.CreateChatEngine(
-            Configuration.Current.InferenceSettings.ModelUrl,
+        using var data = await InferenceEngineFactory.LoadModelDataAsync(Configuration.Current.InferenceSettings.ModelUrl);
+        using var engine = await InferenceEngineFactory.CreateChatEngineAsync(
+            data,
             Configuration.Current.InferenceSettings.SystemPrompt
         );
 
